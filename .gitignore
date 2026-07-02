@@ -1,0 +1,21 @@
+# Godot 4+
+.godot/
+*.translation
+
+# Build outputs
+/android/
+/ios/
+/web/
+/linux/
+/macos/
+/windows/
+
+# Imported assets (regenerated from source)
+*.import
+
+# GUT test output
+/addons/gut/.gut_editor_config.json
+
+# OS junk
+.DS_Store
+Thumbs.db
