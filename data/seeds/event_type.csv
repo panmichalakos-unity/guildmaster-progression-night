@@ -1,0 +1,8 @@
+slug,display_name,trigger,target_selector,roll_attribute,effect_category,log_template
+avoidable_death,Avoidable Death,mechanic_hit,random,awareness,death,{name} stands in it a beat too long — down.
+clutch_save,Clutch Save,ally_near_death,random,consistency,save,{name} snaps off the save — {target} lives.
+near_death,Near Death,damage_spike,random,consistency,tension,{name} survives on a sliver of health.
+cooldown_moment,Cooldown Moment,phase_beat,assigned,execution,surge,Cooldowns drop on call — the raid surges.
+cascade_death,Cascade Death,resource_starvation,random,,death,The healing runs dry — {name} falls with nothing coming.
+assigned_duty,Assigned Duty,duty_window,assigned,execution,duty_check,{name} handles the assignment — clean.
+tank_swap,Tank Swap,stack_threshold,tank,awareness,tank_check,{name} takes the swap right at the threshold.

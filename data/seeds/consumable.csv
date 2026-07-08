@@ -1,0 +1,11 @@
+slug,display_name,type,tier,cost
+emberflask,Emberflask,flask,premium,40
+stoneflask,Stoneflask,flask,premium,40
+dawnflask,Dawnflask,flask,premium,40
+elixir_of_keen_edges,Elixir of Keen Edges,elixir,basic,12
+ironbark_elixir,Ironbark Elixir,elixir,basic,12
+clearwater_elixir,Clearwater Elixir,elixir,basic,12
+bottled_fury,Bottled Fury,potion,basic,8
+bottled_stone,Bottled Stone,potion,basic,8
+hearthstew,Hearthstew,food,basic,5
+whetstone_kit,Whetstone Kit,kit,basic,6

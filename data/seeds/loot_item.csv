@@ -1,0 +1,24 @@
+slug,display_name,encounter_slug,slot_slug,item_level,role_slug,marks_cost,spec_fit_tag
+forgeworn_helm,Forgeworn Helm,gatewarden_krogg,head,28,tank,0,tank_plate
+slagworn_grips,Slagworn Grips,gatewarden_krogg,hands,28,melee,0,melee_physical
+ember_vestment,Ember Vestment,gatewarden_krogg,chest,28,ranged,0,caster
+molten_striders,Molten Striders,gatewarden_krogg,feet,28,healer,0,healer_focus
+cinderforged_mantle,Cinderforged Mantle,forgemaster_vell,shoulder,30,tank,0,tank_plate
+forgeworn_legguards,Forgeworn Legguards,forgemaster_vell,legs,30,melee,0,melee_physical
+ash_grips,Ash Grips,forgemaster_vell,hands,30,healer,0,healer_focus
+stormanvil,"Stormanvil, Vell's Hammer",forgemaster_vell,weapon,30,melee,0,melee_physical
+slaghide_mantle,Slaghide Mantle,slagbeast,shoulder,32,healer,0,healer_focus
+molten_cuirass,Molten Cuirass,slagbeast,chest,32,tank,0,tank_plate
+cinder_legguards,Cinder Legguards,slagbeast,legs,32,ranged,0,caster
+ember_striders,Ember Striders,slagbeast,feet,32,melee,0,melee_physical
+helm_of_the_cinderlords,Helm of the Cinderlords,cinderlords,head,34,healer,0,healer_focus
+molten_grips,Molten Grips,cinderlords,hands,34,tank,0,tank_plate
+ash_legguards,Ash Legguards,cinderlords,legs,34,ranged,0,ranged_physical
+emberbrand,"Emberbrand, the First Flame",cinderlords,weapon,34,ranged,0,caster
+expeditionary_helm,Expeditionary Helm,,head,26,,75,
+expeditionary_mantle,Expeditionary Mantle,,shoulder,26,,75,
+expeditionary_cuirass,Expeditionary Cuirass,,chest,26,,75,
+expeditionary_grips,Expeditionary Grips,,hands,26,,75,
+expeditionary_legguards,Expeditionary Legguards,,legs,26,,75,
+expeditionary_striders,Expeditionary Striders,,feet,26,,75,
+expeditionary_blade,Expeditionary Blade,,weapon,26,,90,

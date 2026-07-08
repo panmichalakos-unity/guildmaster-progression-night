@@ -1,0 +1,17 @@
+{
+	"version": 1,
+	"comment": "Test fixture: exercises slug-ref resolution and bridge keys. Not gameplay content.",
+	"files": [
+		{ "file": "class.csv", "table": "class" },
+		{ "file": "spec.csv", "table": "spec", "refs": [
+			{ "column": "class_slug", "table": "class", "as": "class_id" },
+			{ "column": "role_slug", "table": "role", "as": "role_id" }
+		] },
+		{ "file": "raid_utility.csv", "table": "raid_utility" },
+		{ "file": "spec_utility.csv", "table": "spec_utility",
+			"key": ["spec_id", "utility_id"], "refs": [
+			{ "column": "spec_slug", "table": "spec", "as": "spec_id" },
+			{ "column": "utility_slug", "table": "raid_utility", "as": "utility_id" }
+		] }
+	]
+}

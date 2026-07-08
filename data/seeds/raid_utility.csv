@@ -1,0 +1,9 @@
+slug,display_name,category
+rekindle,Rekindle,combat_revival
+stormsurge,Stormsurge,haste_burst
+countercast,Countercast,interrupt
+unweave,Unweave,dispel
+aegis,Aegis,external_save
+warbanner,Warbanner,raid_buff
+breach,Breach,armor_debuff
+wellspring,Wellspring,mana_regen

@@ -1,0 +1,10 @@
+{
+	"version": 1,
+	"comment": "Test fixture: a ref to a slug that does not exist. Must fail naming the file.",
+	"files": [
+		{ "file": "spec.csv", "table": "spec", "refs": [
+			{ "column": "class_slug", "table": "class", "as": "class_id" },
+			{ "column": "role_slug", "table": "role", "as": "role_id" }
+		] }
+	]
+}

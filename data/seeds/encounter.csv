@@ -1,0 +1,5 @@
+slug,display_name,raid_slug,boss_order,dps_check,healing_check,phase_count,difficulty
+gatewarden_krogg,Gatewarden Krogg,emberdeep,1,40,40,1,35
+forgemaster_vell,Forgemaster Vell,emberdeep,2,50,45,2,45
+slagbeast,The Slagbeast,emberdeep,3,45,65,2,55
+cinderlords,The Cinderlords,emberdeep,4,55,55,2,60

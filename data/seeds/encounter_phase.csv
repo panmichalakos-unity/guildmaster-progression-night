@@ -1,0 +1,8 @@
+slug,display_name,encounter_slug,phase_order,entry_condition
+krogg_p1,The Gate Stands,gatewarden_krogg,1,
+vell_p1,Forgeheat,forgemaster_vell,1,
+vell_p2,Stormcalling,forgemaster_vell,2,boss_hp<=50
+slag_p1,Molten Hide,slagbeast,1,
+slag_p2,Slagfrenzy,slagbeast,2,boss_hp<=35
+cinder_p1,Three Thrones,cinderlords,1,
+cinder_p2,The Last Lord,cinderlords,2,boss_hp<=30

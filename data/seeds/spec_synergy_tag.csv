@@ -1,0 +1,15 @@
+spec_slug,synergy_tag_slug
+radiant,caster_cleave
+umbral,caster_cleave
+ashcaller,caster_cleave
+hexweaver,caster_cleave
+ravager,melee_cleave
+warblade,melee_cleave
+thornclaw,melee_cleave
+cutthroat,melee_cleave
+ashcaller,mana_battery
+radiant,mana_battery
+ravager,threat_support
+warblade,threat_support
+umbral,magic_amplify
+hexweaver,magic_amplify

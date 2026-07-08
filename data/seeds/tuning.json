@@ -1,0 +1,24 @@
+{
+	"_comment": "Starter tuning constants (M1-003). EVERY value here is a symbolic placeholder — the M3-005 batch harness and playtesting are the real judges. Namespaced by system; sim code reads this file directly (it is config seed data, not a DB table). Change values freely; change KEY NAMES only with a cross-validated ticket.",
+	"resolution": {
+		"winrate_target_band": [0.6, 0.8],
+		"sigmoid_scale": 25,
+		"hard_check_sigmoid_scale": 12,
+		"contribution_variance": 0.1
+	},
+	"gear": {
+		"spec_fit_multiplier": 0.5,
+		"marks_per_dungeon": 15
+	},
+	"consumables": {
+		"premium_contribution_bonus": 0.08,
+		"basic_contribution_bonus": 0.04
+	},
+	"genesis": {
+		"starting_gold": 500,
+		"starting_reputation": 40,
+		"roster_size": 28,
+		"rebuild_reputation_mult": 0.6,
+		"rebuild_gold_mult": 0.25
+	}
+}

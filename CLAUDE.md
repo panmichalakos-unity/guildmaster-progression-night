@@ -160,17 +160,18 @@ The initial scaffold may still contain `scenes/`, `scripts/`, and `resources/`. 
 Run from the repo root.
 
 ```bash
-# Project load smoke test
+# Project load smoke test (run with the Godot editor CLOSED — an open editor
+# session blocks project-run mode; -s script smokes below work regardless)
 godot --headless --quit
 
-# Future GdUnit4 test command once addon is installed
-godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/
+# GdUnit4 tests (addon installed in M0-002; --ignoreHeadlessMode is required for headless runs)
+godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a tests/
 
-# Future lint/format once gdtoolkit is installed
-gdformat --check sim/ game/ tests/
-gdlint sim/ game/ tests/
+# Lint/format (gdtoolkit installed via `uv tool install gdtoolkit`; M0-007)
+gdformat --check sim/ tests/ tools/smoke/
+gdlint sim/ tests/ tools/smoke/
 
-# Future seed checks once tools exist
+# Seed integrity checks (M0-006; stdlib Python, no Godot needed)
 python tools/seed_check.py
 
 # Git inspection before/after work

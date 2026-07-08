@@ -1,0 +1,36 @@
+---
+description: Guildmaster Progression Night — project guardrails for AI coding agents
+alwaysApply: true
+---
+
+# Guildmaster: Progression Night — Cursor rules
+
+**Read [`CLAUDE.md`](../../CLAUDE.md) first — it is the canonical contract.** [`AGENTS.md`](../../AGENTS.md) is the short version. If anything here disagrees with `CLAUDE.md`, `CLAUDE.md` wins.
+
+## What this is
+Godot 4.7 management sim — *"Football Manager for old-school MMO raid guilds."* GDScript only. The player runs a raiding guild; they do not fight directly. Tasks are tracked in the Notion Kanban and pasted in as self-contained agent prompts — read the whole ticket body before acting.
+
+## Before editing (every ticket)
+1. Read `CLAUDE.md`.
+2. Read `docs/guildmaster-overview.md` + the relevant system doc (doc map is in `CLAUDE.md`).
+3. Run `git status --short`; identify exact files; keep changes ticket-scoped.
+
+## Non-negotiable rules
+- **GDScript only** — no C#/C++/new plugins unless the ticket asks.
+- **Pure, seeded sim core** in `sim/` — no scene-tree deps; prefer `(input_state, seed) -> outcome`. UI in `game/`.
+- **Seeded RNG only** — everything flows from `GAME_STATE.rng_seed`; no scattered `randi()`/`randf()`. Same seed + inputs = same outcome.
+- **Content as data** — content lives in `data/seeds/` (slug-keyed) + `data/migrations/`, never hardcoded in engine logic.
+- **SQLite is the save** — one DB per campaign; numbered `.sql` migrations.
+- **Signals / EventBus** for cross-system coupling; autoloads are explicit singletons only.
+- **Preserve audit trails** — `PULL_EVENT`, `WEEK_ACTION`, `TREASURY_LEDGER`, `LOOT_CLAIM`.
+- **Tests for sim/logic** — prefer GdUnit4.
+- **IP-safe** — invent every proper noun (`docs/guildmaster-naming-bible.md`).
+
+## Working contract
+- One ticket at a time; don't invent systems, rename architecture, or expand scope.
+- No hidden randomness; no baked-in seed content.
+- **Do not commit unless the user explicitly asks.** Report summary, files changed, checks + exact outcomes, blockers.
+- If an addon/tool isn't installed, say so exactly and run the available checks. Never fake green output.
+
+## Repo layout
+`sim/` pure core · `game/` UI/scenes · `data/seeds` + `data/migrations` · `tools/` (harness.gd, seed_check.py, smoke/) · `tests/` GdUnit4 · `docs/` design docs.

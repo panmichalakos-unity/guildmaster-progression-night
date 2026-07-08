@@ -16,6 +16,19 @@
 # GUT test output
 /addons/gut/.gut_editor_config.json
 
+# GdUnit4 test reports
+/reports/
+
+# SQLite databases (saves + disposable smoke DBs live in user://, never in-repo)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Windows file-replace leftovers (open Godot editor holding addon DLLs)
+~*.dll
+*.TMP
+
 # OS junk
 .DS_Store
 Thumbs.db

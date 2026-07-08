@@ -1,0 +1,53 @@
+# Quality gate (M0-007). Scope: quality checks only — release/export jobs
+# arrive at EA prep (see docs/guildmaster-stack-and-tooling.md).
+#
+# Local/CI parity contract: every command here mirrors a documented local
+# command (README.md "Commands" + CLAUDE.md). If you change one, change both.
+
+name: quality
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: lint & seed checks (no engine)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install gdtoolkit (pinned to local 4.5.x)
+        run: pip install "gdtoolkit==4.5.*"
+      - name: gdformat --check
+        run: gdformat --check sim/ tests/ tools/smoke/
+      - name: gdlint
+        run: gdlint sim/ tests/ tools/smoke/
+      - name: Seed integrity checks (stdlib only)
+        run: python tools/seed_check.py
+
+  test:
+    name: godot headless tests & smokes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      # Pin matches the local editor/CLI: Godot 4.7-stable (ADR-0006).
+      image: barichello/godot-ci:4.7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import project (build .godot cache on fresh checkout)
+        run: godot --headless --import
+      - name: Project load smoke
+        # Exits 0 with a "no main scene" notice until M4-001 adds the shell.
+        # No editor runs in CI, so the editor-contention caveat (ADR-0006)
+        # does not apply here.
+        run: godot --headless --quit
+      - name: Unit tests (GdUnit4)
+        run: godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a tests/
+      - name: Migration smoke
+        run: godot --headless -s tools/smoke/migrate_smoke.gd
+      - name: Seed loader smoke
+        run: godot --headless -s tools/smoke/seed_smoke.gd
+      # TODO(M3-005): balance harness gate — enable once tools/harness.gd lands:
+      #   godot --headless -s tools/harness.gd -- --pulls 2000 --assert-winrate 0.6 0.8
