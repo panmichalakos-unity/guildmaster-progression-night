@@ -4,6 +4,7 @@
 	"files": [
 		{ "file": "role.csv", "table": "role" },
 		{ "file": "slot.csv", "table": "slot" },
+		{ "file": "life_situation.csv", "table": "life_situation" },
 		{ "file": "class.csv", "table": "class" },
 		{ "file": "spec.csv", "table": "spec", "refs": [
 			{ "column": "class_slug", "table": "class", "as": "class_id" },

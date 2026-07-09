@@ -20,5 +20,35 @@
 		"roster_size": 28,
 		"rebuild_reputation_mult": 0.6,
 		"rebuild_gold_mult": 0.25
+	},
+	"roster": {
+		"stars_share": 0.15,
+		"fringe_share": 0.25,
+		"talent_star": [75, 8],
+		"talent_core": [52, 12],
+		"talent_fringe": [38, 10],
+		"experience_by_preset": {
+			"young_gun": 25,
+			"student": 30,
+			"single": 50,
+			"shift_worker": 55,
+			"working_parent": 65,
+			"veteran": 80
+		},
+		"preset_weights": {
+			"single": 22,
+			"student": 12,
+			"working_parent": 22,
+			"shift_worker": 14,
+			"veteran": 18,
+			"young_gun": 12
+		},
+		"role_targets": {
+			"tank": 4,
+			"healer": 7,
+			"melee": 8,
+			"ranged": 9
+		},
+		"starter_ilvl_band": [14, 22]
 	}
 }

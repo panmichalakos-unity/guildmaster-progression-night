@@ -303,6 +303,9 @@ def check_m1_coverage(con: sqlite3.Connection, present: set[str], c: Checker) ->
     if "raid.csv" in present:
         raids = count("SELECT COUNT(*) FROM raid")
         c.check(raids >= 1, f"M1: at least one raid seeded (got {raids})")
+    if "life_situation.csv" in present:
+        presets = count("SELECT COUNT(*) FROM life_situation")
+        c.check(presets == 6, f"M2: exactly 6 life presets (got {presets})")
     if "consumable.csv" in present:
         premium = count("SELECT COUNT(*) FROM consumable WHERE tier = 'premium'")
         basic = count("SELECT COUNT(*) FROM consumable WHERE tier = 'basic'")

@@ -69,10 +69,13 @@ func randfn(mean: float, deviation: float) -> float:
 
 
 ## Uniform pick. Returns null on an empty array.
+## NOTE: internal draws are `self.`-qualified — unqualified randf_range()/
+## randi_range() can bind to the UNSEEDED @GlobalScope functions (caught by
+## the determinism tests; the exact hidden-randomness bug this class bans).
 func pick(items: Array) -> Variant:
 	if items.is_empty():
 		return null
-	return items[randi_range(0, items.size() - 1)]
+	return items[self.randi_range(0, items.size() - 1)]
 
 
 ## Weighted pick: weights align with items by index; weight <= 0 never picked.
@@ -84,7 +87,7 @@ func weighted_pick(items: Array, weights: Array) -> Variant:
 		total += maxf(0.0, float(weight))
 	if items.is_empty() or total <= 0.0:
 		return null
-	var roll := randf_range(0.0, total)
+	var roll := self.randf_range(0.0, total)
 	var cumulative := 0.0
 	for i in items.size():
 		cumulative += maxf(0.0, float(weights[i]))
@@ -96,10 +99,16 @@ func weighted_pick(items: Array, weights: Array) -> Variant:
 ## In-place Fisher-Yates shuffle driven by this stream.
 func shuffle(items: Array) -> void:
 	for i in range(items.size() - 1, 0, -1):
-		var j := randi_range(0, i)
+		var j := self.randi_range(0, i)
 		var swap: Variant = items[i]
 		items[i] = items[j]
 		items[j] = swap
+
+
+## Public FNV-1a fingerprint — stable across runs/platforms/engine versions.
+## Used for roster/report fingerprints and cross-process determinism checks.
+static func fingerprint(text: String) -> int:
+	return _fnv1a(text)
 
 
 static func _fnv1a(text: String) -> int:

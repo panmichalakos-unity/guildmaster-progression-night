@@ -40,6 +40,7 @@ godot --headless --quit        # project-load smoke test
 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a tests/   # unit tests
 godot --headless -s tools/smoke/migrate_smoke.gd   # migration smoke: disposable DB, apply + idempotency
 godot --headless -s tools/smoke/seed_smoke.gd      # seed smoke: migrate + load data/seeds twice, verify counts
+godot --headless -s tools/smoke/roster_smoke.gd -- --seed 12345   # print a generated 28-roster + coverage/issues
 git status --short
 git diff --stat
 ```

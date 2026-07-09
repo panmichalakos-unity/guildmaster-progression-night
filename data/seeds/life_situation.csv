@@ -1,0 +1,7 @@
+slug,display_name,availability_window,volatility_mod,burnout_mod,loyalty_mod
+single,Single,"afternoon,evening,late",-10,-5,0
+student,Student,"evening,late",10,-10,-5
+working_parent,Working Parent,"evening",15,10,10
+shift_worker,Shift Worker,"afternoon,late",25,5,0
+veteran,Veteran,"evening,late",-5,15,15
+young_gun,Young Gun,"afternoon,evening,late",5,-15,-10

@@ -76,6 +76,9 @@ func test_weighted_pick_deterministic_and_skips_zero_weights() -> void:
 	assert_array(picks_a).is_equal(picks_b)
 	assert_bool("never" in picks_a).is_false()
 	assert_bool("kill" in picks_a and "wipe" in picks_a).is_true()
+	# every pick must draw THROUGH the stream — draw_count 0 here would mean
+	# an internal call bound to the unseeded @GlobalScope RNG (regression guard)
+	assert_int(a.draw_count).is_equal(DRAWS)
 
 
 func test_weighted_pick_edge_cases() -> void:
@@ -88,9 +91,11 @@ func test_weighted_pick_edge_cases() -> void:
 func test_shuffle_is_deterministic_permutation() -> void:
 	var items_a := range(30)
 	var items_b := range(30)
-	SimFixture.rng("lineup").shuffle(items_a)
+	var shuffler := SimFixture.rng("lineup")
+	shuffler.shuffle(items_a)
 	SimFixture.rng("lineup").shuffle(items_b)
 	assert_array(items_a).is_equal(items_b)
+	assert_int(shuffler.draw_count).is_equal(29)  # Fisher-Yates over 30 = 29 stream draws
 	var sorted_copy := items_a.duplicate()
 	sorted_copy.sort()
 	assert_array(sorted_copy).is_equal(range(30))  # still a permutation
