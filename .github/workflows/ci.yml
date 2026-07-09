@@ -38,16 +38,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Import project (build .godot cache on fresh checkout)
         run: godot --headless --import
-      - name: Project load smoke
-        # Exits 0 with a "no main scene" notice until M4-001 adds the shell.
-        # No editor runs in CI, so the editor-contention caveat (ADR-0006)
-        # does not apply here.
-        run: godot --headless --quit
+      # NOTE: no `godot --headless --quit` step here until M4-001 adds a main
+      # scene — with no main scene the LINUX build exits 1 ("Can't run
+      # project") while the Windows build exits 0, which broke this job (run
+      # 28968513774). The -s smokes below load the project (scripts +
+      # GDExtension) and exit deterministically, so project load IS covered.
+      # TODO(M4-001): re-enable `godot --headless --quit` once a main scene exists.
       - name: Unit tests (GdUnit4)
         run: godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a tests/
       - name: Migration smoke
         run: godot --headless -s tools/smoke/migrate_smoke.gd
       - name: Seed loader smoke
         run: godot --headless -s tools/smoke/seed_smoke.gd
+      - name: Roster generation smoke
+        run: godot --headless -s tools/smoke/roster_smoke.gd
       # TODO(M3-005): balance harness gate — enable once tools/harness.gd lands:
       #   godot --headless -s tools/harness.gd -- --pulls 2000 --assert-winrate 0.6 0.8
