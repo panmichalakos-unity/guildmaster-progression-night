@@ -1,0 +1,166 @@
+class_name PullInputLoader
+extends RefCounted
+
+## Builds contract-valid PullInputs from REAL campaign rows (M3-005; M4 reuses
+## this — the UI must not re-invent roster/encounter interpretation).
+##
+##   var lineup := PullInputLoader.auto_lineup(db)            # 20 avatar_ids
+##   var input := PullInputLoader.build(db, "gatewarden_krogg", lineup)
+##   var result := PullResolver.resolve(input, rng)
+##
+## Reads: encounter + phases + placements (selector = COALESCE(placement,
+## event_type) — the ADR-0010 override), participants (avatar x player x spec
+## x role x proficiency), guild_encounter_progress, and tuning.json. Volatile
+## state (morale/fatigue/form) defaults to neutral until M5 owns
+## player_week_state snapshots.
+
+const NEUTRAL_STATE := {"morale": 55, "fatigue": 20, "form": 50}
+
+
+## A harness-grade 20-lineup: best-geared 2 tanks / 5 healers / 13 dps.
+## (M4's raid-prep screen owns the real, player-driven lineup.)
+static func auto_lineup(db: Variant) -> Array[int]:
+	var picked: Array[int] = []
+	for role_count: Array in [["tank", 2], ["healer", 5], ["melee", 6], ["ranged", 7]]:
+		db.query_with_bindings(
+			(
+				"SELECT a.avatar_id FROM avatar a"
+				+ " JOIN spec s ON s.spec_id = a.spec_id"
+				+ " JOIN role r ON r.role_id = s.role_id"
+				+ " WHERE r.slug = ? AND a.is_active = 1"
+				+ " ORDER BY a.gear_score DESC, a.avatar_id LIMIT ?;"
+			),
+			[role_count[0], role_count[1]]
+		)
+		for row in db.query_result:
+			picked.append(int(row["avatar_id"]))
+	return picked
+
+
+## Contract-valid PullInput for `encounter_slug` with the given lineup.
+## `overrides`: {guild_id (progress lookup, default 1), attempt_number,
+## consumable_tier ("basic"/"premium"/"" for none), gear_multiplier}.
+static func build(
+	db: Variant, encounter_slug: String, lineup: Array[int], overrides: Dictionary = {}
+) -> Dictionary:
+	var input := PullContracts.make_input()
+	db.query_with_bindings(
+		(
+			"SELECT encounter_id, slug, dps_check, healing_check, difficulty, phase_count"
+			+ " FROM encounter WHERE slug = ?;"
+		),
+		[encounter_slug]
+	)
+	assert(not db.query_result.is_empty(), "unknown encounter '%s'" % encounter_slug)
+	var encounter: Dictionary = db.query_result[0]
+	var encounter_id := int(encounter["encounter_id"])
+	input["encounter"] = {
+		"slug": str(encounter["slug"]),
+		"dps_check": int(encounter["dps_check"]),
+		"healing_check": int(encounter["healing_check"]),
+		"difficulty": int(encounter["difficulty"]),
+		"phase_count": int(encounter["phase_count"]),
+	}
+
+	db.query_with_bindings(
+		(
+			"SELECT slug, phase_order, entry_condition FROM encounter_phase"
+			+ " WHERE encounter_id = ? ORDER BY phase_order;"
+		),
+		[encounter_id]
+	)
+	input["phases"] = db.query_result.duplicate()
+
+	# the ADR-0010 range-profile rule: placement selector overrides the type's
+	db.query_with_bindings(
+		(
+			"SELECT ee.slug, ep.phase_order, et.slug AS event_type_slug, et.trigger,"
+			+ " COALESCE(ee.target_selector, et.target_selector) AS target_selector,"
+			+ " et.roll_attribute, et.effect_category, et.log_template,"
+			+ " ee.severity, ee.weight"
+			+ " FROM encounter_event ee"
+			+ " JOIN encounter_phase ep ON ep.phase_id = ee.phase_id"
+			+ " JOIN event_type et ON et.event_type_id = ee.event_type_id"
+			+ " WHERE ee.encounter_id = ? ORDER BY ep.phase_order, ee.slug;"
+		),
+		[encounter_id]
+	)
+	input["events"] = db.query_result.duplicate()
+
+	input["participants"] = _participants(db, lineup, overrides)
+
+	var guild_id := int(overrides.get("guild_id", 1))
+	db.query_with_bindings(
+		(
+			"SELECT progress, attempt_count, best_attempt_pct FROM guild_encounter_progress"
+			+ " WHERE guild_id = ? AND encounter_id = ?;"
+		),
+		[guild_id, encounter_id]
+	)
+	if not db.query_result.is_empty():
+		input["encounter_progress"] = db.query_result[0].duplicate()
+	input["attempt_number"] = int(overrides.get("attempt_number", 1))
+
+	var tuning: Dictionary = Tuning.section("resolution").duplicate()
+	tuning["consumables"] = Tuning.section("consumables")
+	input["tuning"] = tuning
+	return input
+
+
+static func _participants(db: Variant, lineup: Array[int], overrides: Dictionary) -> Array:
+	var gear_multiplier := float(overrides.get("gear_multiplier", 1.0))
+	var consumable_tier := str(overrides.get("consumable_tier", "basic"))
+	var participants := []
+	var main_tank_assigned := false
+	for avatar_id in lineup:
+		db.query_with_bindings(
+			(
+				"SELECT a.avatar_id, a.player_id, p.handle, r.slug AS role_slug,"
+				+ " s.slug AS spec_slug, s.spec_difficulty, a.gear_score, a.item_level,"
+				+ " a.familiarity, a.hit_capped, a.uncrittable,"
+				+ " p.execution, p.awareness, p.consistency,"
+				+ " COALESCE(prp.proficiency, 50) AS role_proficiency"
+				+ " FROM avatar a"
+				+ " JOIN player p ON p.player_id = a.player_id"
+				+ " JOIN spec s ON s.spec_id = a.spec_id"
+				+ " JOIN role r ON r.role_id = s.role_id"
+				+ " LEFT JOIN player_role_proficiency prp"
+				+ " ON prp.player_id = a.player_id AND prp.role_id = r.role_id"
+				+ " WHERE a.avatar_id = ?;"
+			),
+			[avatar_id]
+		)
+		assert(not db.query_result.is_empty(), "unknown avatar_id %d" % avatar_id)
+		var row: Dictionary = db.query_result[0].duplicate()
+
+		row["gear_score"] = roundi(float(row["gear_score"]) * gear_multiplier)
+		row["item_level"] = roundi(float(row["item_level"]) * gear_multiplier)
+		# caps DERIVE from gear (gear doc): recompute from the scaled ilvl with
+		# the same placeholder rule AvatarGen stamps at generation — otherwise a
+		# 3x-geared tank keeps its starter not-uncrittable flag forever
+		# (M6-005 replaces this rule engine-wide when equip-on-award lands).
+		row["hit_capped"] = 1 if int(row["item_level"]) >= AvatarGen.CAP_ILVL_THRESHOLD else 0
+		row["uncrittable"] = (
+			1
+			if (
+				str(row["role_slug"]) == "tank"
+				and int(row["item_level"]) >= AvatarGen.CAP_ILVL_THRESHOLD + 2
+			)
+			else 0
+		)
+		row["morale"] = NEUTRAL_STATE["morale"]
+		row["fatigue"] = NEUTRAL_STATE["fatigue"]
+		row["form"] = NEUTRAL_STATE["form"]
+		row["consumables"] = (
+			[]
+			if consumable_tier.is_empty()
+			else [{"slug": "harness_%s" % consumable_tier, "tier": consumable_tier}]
+		)
+		# first tank in gear order = main tank (harness-grade assignment)
+		if str(row["role_slug"]) == "tank" and not main_tank_assigned:
+			row["assignments"] = [{"assignment_type": "tank", "target": "main"}]
+			main_tank_assigned = true
+		else:
+			row["assignments"] = []
+		participants.append(row)
+	return participants

@@ -52,5 +52,8 @@ jobs:
         run: godot --headless -s tools/smoke/seed_smoke.gd
       - name: Roster generation smoke
         run: godot --headless -s tools/smoke/roster_smoke.gd
-      # TODO(M3-005): balance harness gate — enable once tools/harness.gd lands:
-      #   godot --headless -s tools/harness.gd -- --pulls 2000 --assert-winrate 0.6 0.8
+      - name: Balance harness gate (M3-005)
+        # asserts the difficulty-via-margin contract on real seeds: the 60-80%
+        # band is reachable, win rates are monotone in gear, and the curve
+        # spans decisive-wipe to one-shot (see tools/harness.gd header)
+        run: godot --headless -s tools/harness.gd -- --pulls 100 --assert-winrate 0.6 0.8

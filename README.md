@@ -41,6 +41,8 @@ godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a 
 godot --headless -s tools/smoke/migrate_smoke.gd   # migration smoke: disposable DB, apply + idempotency
 godot --headless -s tools/smoke/seed_smoke.gd      # seed smoke: migrate + load data/seeds twice, verify counts
 godot --headless -s tools/smoke/roster_smoke.gd -- --seed 12345   # print a generated 28-roster + coverage/issues
+godot --headless -s tools/harness.gd -- --pulls 150 --assert-winrate 0.6 0.8   # balance harness: boss x gear win-rate matrix
+godot --headless -s tools/harness.gd -- --pulls 100 --csv user://pulls.csv     # dump per-pull CSV for the balance lab
 git status --short
 git diff --stat
 ```
