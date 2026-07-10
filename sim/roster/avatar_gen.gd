@@ -21,6 +21,17 @@ extends RefCounted
 const CAP_ILVL_THRESHOLD := 20  # avg ilvl gate for starting caps (placeholder)
 
 
+## THE caps-from-gear rule (gear doc: caps DERIVE from the equipped set).
+## Placeholder thresholds until M6-005 owns the real recompute — every path
+## that needs caps (generation, gear-scaled loads) calls THIS, never copies
+## the thresholds (review finding, ADR-0021).
+static func derive_caps(avg_ilvl: int, role_slug: String) -> Dictionary:
+	return {
+		"hit_capped": 1 if avg_ilvl >= CAP_ILVL_THRESHOLD else 0,
+		"uncrittable": 1 if (role_slug == "tank" and avg_ilvl >= CAP_ILVL_THRESHOLD + 2) else 0,
+	}
+
+
 ## Assigns avatars for `player_rows` (each: player_id, growth_rate, execution).
 ## Reads specs + starter items from the DB (seed rows). Pure given (db state,
 ## rng): same inputs -> same assignments. Returns Array of avatar Dictionaries.
@@ -174,10 +185,8 @@ static func _generate_avatar(
 		"item_level": avg_ilvl,
 		"gear_score": gear_score,
 		"familiarity": familiarity,
-		# placeholder start-state rule until M6-005 owns caps-from-gear
-		"hit_capped": 1 if avg_ilvl >= CAP_ILVL_THRESHOLD else 0,
-		"uncrittable":
-		1 if (str(role["slug"]) == "tank" and avg_ilvl >= CAP_ILVL_THRESHOLD + 2) else 0,
+		"hit_capped": derive_caps(avg_ilvl, str(role["slug"]))["hit_capped"],
+		"uncrittable": derive_caps(avg_ilvl, str(role["slug"]))["uncrittable"],
 		"items": items,
 		"role_proficiencies": _proficiencies(player, spec, all_role_ids, rng),
 	}

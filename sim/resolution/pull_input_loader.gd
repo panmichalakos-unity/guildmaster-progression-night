@@ -110,44 +110,49 @@ static func build(
 static func _participants(db: Variant, lineup: Array[int], overrides: Dictionary) -> Array:
 	var gear_multiplier := float(overrides.get("gear_multiplier", 1.0))
 	var consumable_tier := str(overrides.get("consumable_tier", "basic"))
+	# ONE query for the whole lineup (was 20 round-trips; review finding).
+	# Rows are re-ordered to lineup order below — participant order drives
+	# rng draw order, so it must stay exactly the caller's order.
+	var placeholders: Array[String] = []
+	var ids: Array = []
+	for avatar_id in lineup:
+		placeholders.append("?")
+		ids.append(avatar_id)
+	db.query_with_bindings(
+		(
+			"SELECT a.avatar_id, a.player_id, p.handle, r.slug AS role_slug,"
+			+ " s.slug AS spec_slug, s.spec_difficulty, a.gear_score, a.item_level,"
+			+ " a.familiarity, a.hit_capped, a.uncrittable,"
+			+ " p.execution, p.awareness, p.consistency,"
+			+ " COALESCE(prp.proficiency, 50) AS role_proficiency"
+			+ " FROM avatar a"
+			+ " JOIN player p ON p.player_id = a.player_id"
+			+ " JOIN spec s ON s.spec_id = a.spec_id"
+			+ " JOIN role r ON r.role_id = s.role_id"
+			+ " LEFT JOIN player_role_proficiency prp"
+			+ " ON prp.player_id = a.player_id AND prp.role_id = r.role_id"
+			+ " WHERE a.avatar_id IN (%s);" % ", ".join(placeholders)
+		),
+		ids
+	)
+	var by_id := {}
+	for fetched in db.query_result:
+		by_id[int(fetched["avatar_id"])] = fetched.duplicate()
+
 	var participants := []
 	var main_tank_assigned := false
 	for avatar_id in lineup:
-		db.query_with_bindings(
-			(
-				"SELECT a.avatar_id, a.player_id, p.handle, r.slug AS role_slug,"
-				+ " s.slug AS spec_slug, s.spec_difficulty, a.gear_score, a.item_level,"
-				+ " a.familiarity, a.hit_capped, a.uncrittable,"
-				+ " p.execution, p.awareness, p.consistency,"
-				+ " COALESCE(prp.proficiency, 50) AS role_proficiency"
-				+ " FROM avatar a"
-				+ " JOIN player p ON p.player_id = a.player_id"
-				+ " JOIN spec s ON s.spec_id = a.spec_id"
-				+ " JOIN role r ON r.role_id = s.role_id"
-				+ " LEFT JOIN player_role_proficiency prp"
-				+ " ON prp.player_id = a.player_id AND prp.role_id = r.role_id"
-				+ " WHERE a.avatar_id = ?;"
-			),
-			[avatar_id]
-		)
-		assert(not db.query_result.is_empty(), "unknown avatar_id %d" % avatar_id)
-		var row: Dictionary = db.query_result[0].duplicate()
+		assert(by_id.has(avatar_id), "unknown avatar_id %d" % avatar_id)
+		var row: Dictionary = by_id[avatar_id]
 
 		row["gear_score"] = roundi(float(row["gear_score"]) * gear_multiplier)
 		row["item_level"] = roundi(float(row["item_level"]) * gear_multiplier)
-		# caps DERIVE from gear (gear doc): recompute from the scaled ilvl with
-		# the same placeholder rule AvatarGen stamps at generation — otherwise a
-		# 3x-geared tank keeps its starter not-uncrittable flag forever
-		# (M6-005 replaces this rule engine-wide when equip-on-award lands).
-		row["hit_capped"] = 1 if int(row["item_level"]) >= AvatarGen.CAP_ILVL_THRESHOLD else 0
-		row["uncrittable"] = (
-			1
-			if (
-				str(row["role_slug"]) == "tank"
-				and int(row["item_level"]) >= AvatarGen.CAP_ILVL_THRESHOLD + 2
-			)
-			else 0
-		)
+		# caps DERIVE from gear (gear doc): recompute from the scaled ilvl via
+		# THE shared rule — a 3x-geared tank must not keep its starter
+		# not-uncrittable flag (M6-005 replaces the rule engine-wide later).
+		var caps := AvatarGen.derive_caps(int(row["item_level"]), str(row["role_slug"]))
+		row["hit_capped"] = caps["hit_capped"]
+		row["uncrittable"] = caps["uncrittable"]
 		row["morale"] = NEUTRAL_STATE["morale"]
 		row["fatigue"] = NEUTRAL_STATE["fatigue"]
 		row["form"] = NEUTRAL_STATE["form"]

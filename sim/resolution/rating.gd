@@ -18,15 +18,16 @@ const DEFAULTS := {
 	"reference_realization": 0.65,  # skill-50 raider: 0.35 + 0.5 * 0.6
 }
 
-## combat-log outcome -> rating delta for the event's target
-const _EVENT_DELTAS := {
-	"death": -2.0,
-	"tank_death": -2.0,
-	"duty_fail": -2.0,
-	"save": 1.5,
-	"duty_ok": 0.5,
-	"surge": 0.5,
-	"survived": 0.5,
+## combat-log outcome -> rating delta, keyed on Timeline's OUTCOME_* constants
+## (never raw strings — a rename there must break HERE at parse time, ADR-0021)
+static var _outcome_deltas := {
+	Timeline.OUTCOME_DEATH: -2.0,
+	Timeline.OUTCOME_TANK_DEATH: -2.0,
+	Timeline.OUTCOME_DUTY_FAIL: -2.0,
+	Timeline.OUTCOME_SAVE: 1.5,
+	Timeline.OUTCOME_DUTY_OK: 0.5,
+	Timeline.OUTCOME_SURGE: 0.5,
+	Timeline.OUTCOME_SURVIVED: 0.5,
 }
 
 
@@ -76,7 +77,7 @@ static func rate(
 static func _event_deltas(events: Array) -> Dictionary:
 	var deltas := {}
 	for event: Dictionary in events:
-		var delta := float(_EVENT_DELTAS.get(str(event.get("outcome", "")), 0.0))
+		var delta := float(_outcome_deltas.get(str(event.get("outcome", "")), 0.0))
 		if delta == 0.0:
 			continue
 		var target := int(event.get("target_avatar_id", 0))

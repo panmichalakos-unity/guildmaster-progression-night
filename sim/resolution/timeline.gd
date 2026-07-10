@@ -32,6 +32,16 @@ const DEFAULTS := {
 	"severity_learning_rate": 0.08,
 }
 
+## Combat-log outcome vocabulary. RatingEngine keys its deltas on THESE
+## constants — never repeat the raw strings (review finding, ADR-0021).
+const OUTCOME_DEATH := "death"
+const OUTCOME_TANK_DEATH := "tank_death"
+const OUTCOME_DUTY_FAIL := "duty_fail"
+const OUTCOME_DUTY_OK := "duty_ok"
+const OUTCOME_SAVE := "save"
+const OUTCOME_SURGE := "surge"
+const OUTCOME_SURVIVED := "survived"
+
 const _ATTR_FIELD := {
 	"awareness": "awareness", "consistency": "consistency", "execution": "execution"
 }
@@ -81,8 +91,14 @@ static func run(input: Dictionary, rng: RngStream) -> Dictionary:
 	for phase: Dictionary in _sorted_phases(input["phases"]):
 		state["deaths_this_phase"] = [] as Array[int]
 		for event: Dictionary in _phase_events(events, int(phase["phase_order"])):
-			var fire_count := maxi(1, roundi(float(event.get("weight", 100)) / 100.0))
-			for _shot in fire_count:
+			# weight = firing rate in percent: 100 fires exactly once, 60 fires
+			# 60% of pulls, 140 fires once plus a 40% second shot — every
+			# authored value is a live tuning knob (review finding, ADR-0021)
+			var weight := float(event.get("weight", 100))
+			var fires := int(weight / 100.0)
+			if event_rng.randf() < (weight - fires * 100.0) / 100.0:
+				fires += 1
+			for _shot in fires:
 				_fire(event, phase, participants, state, tuning, event_rng)
 
 	# re-aggregate lanes from the SAME contribution draws, minus the fallen
@@ -174,7 +190,7 @@ static func _resolve_death(
 		)
 	else:
 		_kill(state, target)
-		_emit(state, event, phase, target, roll["text"], "death", _render(event, target, {}))
+		_emit(state, event, phase, target, roll["text"], OUTCOME_DEATH, _render(event, target, {}))
 
 
 static func _resolve_save(
@@ -243,7 +259,7 @@ static func _resolve_tension(
 		tuning,
 		rng
 	)
-	_emit(state, event, phase, target, roll["text"], "survived", _render(event, target, {}))
+	_emit(state, event, phase, target, roll["text"], OUTCOME_SURVIVED, _render(event, target, {}))
 
 
 static func _resolve_surge(
@@ -304,9 +320,12 @@ static func _resolve_duty(
 		)
 	else:
 		state["assigned_failures"] = int(state["assigned_failures"]) + 1
-		# the missed interrupt/soak lands on someone else: cascade pressure
+		# the missed interrupt/soak lands on SOMEONE ELSE: cascade pressure
+		# (assignee excluded — "X misses, X falls" reads as a bug; ADR-0021)
+		var victim_exclude: Dictionary = state["dead_set"].duplicate()
+		victim_exclude[int(target["avatar_id"])] = true
 		var victim := _select_targets(
-			{"target_selector": "random"}, participants, state["dead_set"], rng, 1
+			{"target_selector": "random"}, participants, victim_exclude, rng, 1
 		)
 		if victim.is_empty():
 			_emit(

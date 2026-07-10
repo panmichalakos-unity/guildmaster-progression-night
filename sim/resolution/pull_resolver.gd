@@ -146,7 +146,9 @@ static func persist(
 	var progress: Dictionary = result["state_deltas"]["encounter_progress"]
 	var first_kill_at: Variant = null
 	if str(result["pull"]["outcome"]) == "kill":
-		first_kill_at = "now"
+		# audit timestamp (like schema_migration.applied_at) — persist() is the
+		# side-effect layer; the deterministic result never contains wall-clock
+		first_kill_at = Time.get_datetime_string_from_system(true)
 	if not (
 		db
 		. query_with_bindings(
@@ -234,7 +236,7 @@ static func _participant_deltas(
 ) -> Array[Dictionary]:
 	var save_targets := {}
 	for event: Dictionary in timeline["events"]:
-		if str(event["outcome"]) == "save":
+		if str(event["outcome"]) == Timeline.OUTCOME_SAVE:
 			save_targets[int(event["target_avatar_id"])] = true
 
 	var deltas: Array[Dictionary] = []
@@ -274,9 +276,9 @@ static func _with_duty_check(checks: Array, events: Array) -> Array:
 	var failures := 0
 	for event: Dictionary in events:
 		match str(event.get("outcome", "")):
-			"duty_ok":
+			Timeline.OUTCOME_DUTY_OK:
 				successes += 1
-			"duty_fail":
+			Timeline.OUTCOME_DUTY_FAIL:
 				failures += 1
 	if successes + failures == 0:
 		return checks
