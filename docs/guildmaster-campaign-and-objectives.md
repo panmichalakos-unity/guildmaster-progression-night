@@ -24,6 +24,9 @@ REPORT
 The **calendar is a first-class object** — events scheduled on days. The old "time budget" becomes concrete: *how many event-slots the week holds, and who's available for each.*
 
 ## Season & expansion structure
+
+> ✅ **LOCKED 2026-07-11 (I-03, Model A).** **Season = Tier.** The v1 expansion contains **two seasons**: Season 1 / Tier 1 (~12–14 wk) → grading → Season 2 / Tier 2 (~12–14 wk) → final grading → career summary → endless mode or rebuild. This is now canonical across all docs; `guildmaster-content-and-dod.md`'s old "one 14-week season across 2 tiers" wording was the contradiction and has been corrected. Every calendar/objective/rival/UI string must express this model.
+
 - **Season = one raid tier.** Its **length is a property of the expansion** — a variety lever:
 
   | Expansion shape | Season | Feel |

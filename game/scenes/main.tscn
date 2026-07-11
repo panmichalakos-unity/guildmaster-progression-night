@@ -1,8 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://c38gj7ggcytpa"]
 
-[ext_resource type="Script" path="res://game/ui/app_shell.gd" id="1"]
+[ext_resource type="Script" uid="uid://cd52g7ai4f6h8" path="res://game/ui/app_shell.gd" id="1"]
 
-[node name="Main" type="Control"]
+[node name="Main" type="Control" unique_id=1285318585]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

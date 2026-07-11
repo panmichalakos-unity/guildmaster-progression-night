@@ -50,8 +50,8 @@ Coverage: **3 tank specs across 3 classes** (comp resilience — losing one clas
 
 **Rationale on the key calls:**
 - **6 classes / 18 specs (3 each)** — enough that comps have gaps (you can't bring every utility → real "bring the class" decisions) and each spec is still tunable solo. Locked, with the role-coverage matrix above.
-- **2 tiers / ~12 bosses** — gives a difficulty ramp *within* a season (early gear-checks → mid mechanic-checks → the end-boss wall) and a gear treadmill, without a 3rd-raid authoring load.
-- **14-week season** — one full objective cycle with room for the learning arc to breathe. (Expansion-varying length is a v1.1 lever once multi-expansion lands.)
+- **2 tiers / ~12 bosses** — a difficulty ramp *across the expansion* (early gear-checks → mid mechanic-checks → the end-boss wall) and a gear treadmill, without a 3rd-raid authoring load. **Each tier is its own season** (I-03).
+- **~14-week season, one per tier** — each is one full objective cycle with room for the learning arc to breathe; the v1 expansion is therefore ~2 seasons. (Expansion-varying length is a v1.1 lever once multi-expansion lands.)
 
 **Dependency flag:** the **competitive** objective type needs the **rival ladder (P1)**. If the ladder is cut from v1, drop competitive from the v1 objective set (→ 5 types).
 
@@ -60,12 +60,36 @@ Coverage: **3 tank specs across 3 classes** (comp resilience — losing one clas
 ## Definition of Done — two gates
 
 ### Gate 1 — Vertical Slice (Phase A, the fun-proof)
-- [ ] Generate a 20-raider roster (traits + gear + specs), inspectable
-- [ ] One raid (3–4 bosses) seeded
-- [ ] Resolve a raid night: lineup → assignments → pull-by-pull combat log → kill/wipe + `wipe_reason` + per-raider ratings + loot drop
-- [ ] Post-night report readable
-- [ ] Deterministic: same seed → same result; batch harness runs N pulls, win-rate lands near the ~60–80% target
-- [ ] **Verdict: is the raid night fun to run?** — subjective gate. Iterate here until yes *before* Phase B.
+
+**Technical items — all shipped (M0–M4):**
+- [x] Generate a 20-raider roster (traits + gear + specs), inspectable
+- [x] One raid (3–4 bosses) seeded
+- [x] Resolve a raid night: lineup → assignments → pull-by-pull combat log → kill/wipe + `wipe_reason` + per-raider ratings + loot drop
+- [x] Post-night report readable
+- [x] Deterministic: same seed → same result; batch harness runs N pulls, win-rate lands near the ~60–80% target
+
+**🔒 The gate itself — NOT PASSED (2026-07-11):**
+- [ ] **Verdict: is the raid night fun to run?**
+
+> **Technical completion is not the gate.** The default first session resolves **32 pulls, 0 kills, 32 wipes** — the entry boss demands roughly the gear it drops (starting ilvl 18.9 vs Tier-1 drops at ilvl 31), and the four checks are conjunctive rolls that cap even a healthy raid at ~41%. A player cannot experience *prepare → fail legibly → adjust → get closer → **kill***.
+>
+> **Milestone MI (Intervention) blocks M5.** See `guildmaster-intervention-and-realignment.md`. The gate is a **human verdict from real playtesters** (MI-010), scored against the card below — not a test suite.
+
+#### The human Fun Gate scorecard (MI-010)
+
+| Question | Pass condition |
+|---|---|
+| Can the player explain the immediate problem? | They name a roster, comp, gear, duty or readiness weakness. |
+| Can they make a meaningful decision? | They intentionally change lineup, assignment, consumables or strategy. |
+| Is failure legible? | They can state a primary cause **and** a contributing factor. |
+| Does the next pull show a consequence? | The change produces a visible margin/event/outcome difference. |
+| Is there emotional escalation? | They recognise close calls and improving/worsening attempts. |
+| **Is a first kill plausible?** | A representative session produces one **without hidden setup or excessive repetition.** |
+| Do named raiders matter? | They recall several people and their role in the result. |
+| Is MMO terminology understandable? | A non-MMO player can act on warnings from the UI alone. |
+| **Does the player want to continue?** | They ask for another pull, boss, or week. |
+
+A weak score does **not** mean "add more systems". The remedy is balance, presentation, explanation, stronger leverage, or a better first-session scenario.
 
 ### Gate 2 — v1 Early Access (Phase B, shippable)
 **Feature-complete:**
@@ -88,7 +112,9 @@ Coverage: **3 tank specs across 3 classes** (comp resilience — losing one clas
 - [ ] Naming bible applied — all content IP-safe
 - [ ] Observability: the "why did this happen" debug view (`PULL_EVENT` / `TREASURY_LEDGER` / `WEEK_ACTION`)
 
-**The one-line bar:** *Start a guild → play a full 14-week season across 2 tiers → get graded on objectives → progress to the next season at a higher bar, or get sacked and rebuild — with every core system exercised.*
+**The one-line bar** *(corrected 2026-07-11 — I-03: **Season = Tier**)*: *Start a guild → play a full **season (Tier 1, ~14 weeks)** → get graded on objectives → progress into **Season 2 (Tier 2)** at a raised bar, or get sacked and rebuild — with every core system exercised.*
+
+> ⚠️ **Superseded wording.** This bar previously read "a full 14-week season across 2 tiers", which contradicted `guildmaster-campaign-and-objectives.md` ("Season = one raid tier"). The contradiction is resolved in favour of **Season = Tier**: one v1 expansion contains **two seasons**, one per tier. See the intervention doc's decision register (I-03).
 
 ### Explicitly OUT of v1 (Phase C / v1.1)
 Chemistry graph · quirks · drama-event catalogue · resistance checks · multi-expansion · Player-Guildmaster · professions/crafting · Soft-Reserve/EPGP · full rival sim (light ladder only, or cut). *Protecting this list protects the timeline.*
