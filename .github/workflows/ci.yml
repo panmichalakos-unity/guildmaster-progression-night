@@ -51,8 +51,15 @@ jobs:
         run: godot --headless -s tools/smoke/roster_smoke.gd
       - name: Vertical slice smoke (M4-005)
         run: godot --headless -s tools/smoke/slice_smoke.gd -- --seed 133742
+      - name: Night One fun-gate smoke (MI-003)
+        # the first session must TEACH: the default lineup fields a crittable main
+        # tank, prep warns before the pull, pulling anyway is a tank_survival wall,
+        # and benching the star tank turns it into a kill in a handful of pulls.
+        # See docs/guildmaster-first-session.md — this is the fun gate itself.
+        run: godot --headless -s tools/smoke/first_night_smoke.gd -- --seed 133742
       - name: Balance harness gate (M3-005)
-        # asserts the difficulty-via-margin contract on real seeds: the 60-80%
-        # band is reachable, win rates are monotone in gear, and the curve
-        # spans decisive-wipe to one-shot (see tools/harness.gd header)
+        # asserts the difficulty-via-margin contract on real seeds: a win-rate band
+        # is reachable, win rates are monotone in gear, and the curve spans
+        # decisive-wipe to one-shot (see tools/harness.gd header). MI-009 replaces
+        # this single global band with per-boss contract asserts.
         run: godot --headless -s tools/harness.gd -- --pulls 100 --assert-winrate 0.6 0.8

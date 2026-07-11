@@ -18,17 +18,26 @@ extends RefCounted
 ##   * familiarity is an avatar accumulator (resets on re-roll): seasoned
 ##     players (low growth_rate) start higher on their long-played spec.
 
-const CAP_ILVL_THRESHOLD := 20  # avg ilvl gate for starting caps (placeholder)
+const CAP_ILVL_THRESHOLD := 20  # avg ilvl gate for the hit cap (placeholder)
 
 
 ## THE caps-from-gear rule (gear doc: caps DERIVE from the equipped set).
-## Placeholder thresholds until M6-005 owns the real recompute — every path
-## that needs caps (generation, gear-scaled loads) calls THIS, never copies
-## the thresholds (review finding, ADR-0021).
-static func derive_caps(avg_ilvl: int, role_slug: String) -> Dictionary:
+## Every path that needs caps (generation, gear-scaled loads) calls THIS and
+## never copies the thresholds (review finding, ADR-0021).
+##
+## `defense_cap_ilvl` is the tanking spec's own crit-immunity threshold, from
+## the spec seed row; 0 means the spec cannot tank and the cap never applies.
+## It is deliberately NOT a shared constant: when every tank capped at the same
+## avg ilvl, "crit-immune" was identical to "best-geared" (gear_score is just the
+## sum of the same 7 slot item levels), so the tank gate — the strongest lever in
+## the game — could never be a player decision. Per-spec thresholds mean a
+## hide-armoured tank can out-gear a plated one and still be crittable, and the
+## right call is to field the tank who looks worse on paper. See ADR-0025.
+static func derive_caps(avg_ilvl: int, role_slug: String, defense_cap_ilvl: int) -> Dictionary:
+	var can_tank := role_slug == "tank" and defense_cap_ilvl > 0
 	return {
 		"hit_capped": 1 if avg_ilvl >= CAP_ILVL_THRESHOLD else 0,
-		"uncrittable": 1 if (role_slug == "tank" and avg_ilvl >= CAP_ILVL_THRESHOLD + 2) else 0,
+		"uncrittable": 1 if (can_tank and avg_ilvl >= defense_cap_ilvl) else 0,
 	}
 
 
@@ -172,6 +181,7 @@ static func _generate_avatar(
 			)
 		)
 	var avg_ilvl := int(round(gear_score / 7.0))
+	var caps := derive_caps(avg_ilvl, str(role["slug"]), int(spec["defense_cap_ilvl"]))
 	# seasoned raiders (low growth_rate ~ older) start with more spec familiarity
 	var familiarity := clampi(
 		roundi(85.0 - float(player["growth_rate"]) * 0.6 + rng.randfn(0.0, 8.0)), 10, 90
@@ -185,8 +195,8 @@ static func _generate_avatar(
 		"item_level": avg_ilvl,
 		"gear_score": gear_score,
 		"familiarity": familiarity,
-		"hit_capped": derive_caps(avg_ilvl, str(role["slug"]))["hit_capped"],
-		"uncrittable": derive_caps(avg_ilvl, str(role["slug"]))["uncrittable"],
+		"hit_capped": caps["hit_capped"],
+		"uncrittable": caps["uncrittable"],
 		"items": items,
 		"role_proficiencies": _proficiencies(player, spec, all_role_ids, rng),
 	}
@@ -219,7 +229,8 @@ static func _proficiencies(
 static func _specs_by_role(db: Variant) -> Dictionary:
 	db.query(
 		(
-			"SELECT s.spec_id, s.class_id, s.role_id, s.slug, r.slug AS role_slug"
+			"SELECT s.spec_id, s.class_id, s.role_id, s.slug, s.defense_cap_ilvl,"
+			+ " r.slug AS role_slug"
 			+ " FROM spec s JOIN role r ON r.role_id = s.role_id ORDER BY s.spec_id;"
 		)
 	)

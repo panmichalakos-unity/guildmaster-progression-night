@@ -80,13 +80,38 @@ func test_gear_score_is_exact_sum_of_slot_levels() -> void:
 		assert_int(int(avatar["item_level"])).is_equal(int(round(level_sum / 7.0)))
 
 
-func test_caps_derive_from_gear_placeholder_rule() -> void:
+func test_caps_derive_from_gear() -> void:
+	var caps_by_spec := _defense_caps()
 	for avatar in _avatars():
 		var avg := int(avatar["item_level"])
 		assert_int(int(avatar["hit_capped"])).is_equal(1 if avg >= 20 else 0)
+		var cap := int(caps_by_spec[int(avatar["spec_id"])])
+		var immune := str(avatar["role_slug"]) == "tank" and cap > 0 and avg >= cap
+		assert_int(int(avatar["uncrittable"])).is_equal(1 if immune else 0)
 		if int(avatar["uncrittable"]) == 1:
 			assert_str(str(avatar["role_slug"])).is_equal("tank")
-			assert_bool(avg >= 22).is_true()
+
+
+## ADR-0025 — the whole point of a per-spec defense cap: a BETTER-geared tank can
+## still be crittable while a WORSE-geared one is crit-immune. Without this the
+## best-geared tank was always the immune one (gear_score is just the sum of the
+## same slot item levels), so the tank gate could never be a player decision.
+func test_defense_cap_is_per_spec_not_a_gear_threshold() -> void:
+	var hide_tank := AvatarGen.derive_caps(24, "tank", 27)
+	var plated_tank := AvatarGen.derive_caps(21, "tank", 20)
+	assert_int(int(hide_tank["uncrittable"])).is_equal(0)
+	assert_int(int(plated_tank["uncrittable"])).is_equal(1)
+	# and the cap never applies to a spec that cannot tank
+	assert_int(int(AvatarGen.derive_caps(40, "melee", 0)["uncrittable"])).is_equal(0)
+	assert_int(int(AvatarGen.derive_caps(40, "tank", 0)["uncrittable"])).is_equal(0)
+
+
+func _defense_caps() -> Dictionary:
+	_db.query("SELECT spec_id, defense_cap_ilvl FROM spec;")
+	var by_spec := {}
+	for row in _db.query_result:
+		by_spec[int(row["spec_id"])] = int(row["defense_cap_ilvl"])
+	return by_spec
 
 
 func test_proficiencies_anchor_on_assigned_role() -> void:

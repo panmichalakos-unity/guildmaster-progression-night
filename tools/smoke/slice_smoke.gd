@@ -4,6 +4,13 @@ extends SceneTree
 ## full Emberdeep night → report. Exit 0 on success.
 ##
 ##   godot --headless -s tools/smoke/slice_smoke.gd -- --seed 133742
+##
+## MI-003: this plays the night as a COMPETENT guildmaster — it reads the raid-prep
+## warning and benches the crittable main tank before pulling. That fix is the whole
+## Night One lesson (docs/guildmaster-first-session.md); a player who ignores it
+## wipes all night by design, which is what `first_night_smoke.gd` measures. The
+## slice therefore asserts a KILL: a green slice with zero kills is precisely the
+## failure this project's intervention existed to stop.
 
 
 func _init() -> void:
@@ -23,6 +30,8 @@ func _init() -> void:
 	print("  %s" % report["summary_line"])
 	if int(report["pull_count"]) < 4:
 		_fail("expected at least one pull per boss")
+	if int(report["kills"]) < 1:
+		_fail("a prepared raid killed nothing all night — the slice is not playable")
 	if report["ratings"].is_empty():
 		_fail("report missing ratings")
 	if report["bosses"].size() != 4:
@@ -49,7 +58,10 @@ func _run_night(seed_value: int) -> Dictionary:
 	if campaign.is_empty():
 		return {"ok": false, "error": "DemoCampaign.build failed"}
 	var db: Variant = campaign["db"]
-	var prep_report := RaidPrep.build(db, int(campaign["event_id"]))
+	var event_id := int(campaign["event_id"])
+	# read the prep warning and act on it, like a guildmaster would
+	var lineup := _fix_the_tank(db, int(campaign["scenario"]["incumbent_id"]))
+	var prep_report := RaidPrep.build(db, event_id, lineup)
 	if not bool(prep_report["ready"]):
 		db.close_db()
 		return {"ok": false, "error": "prep lineup not ready"}
@@ -69,6 +81,26 @@ func _run_night(seed_value: int) -> Dictionary:
 	)
 	db.close_db()
 	return night
+
+
+## The Night One fix: bench the crittable star tank the default lineup fields,
+## and call up the best tank left on the bench.
+func _fix_the_tank(db: Variant, incumbent_id: int) -> Array[int]:
+	var lineup := RaidPrep.toggle(PullInputLoader.auto_lineup(db), incumbent_id)
+	db.query(
+		(
+			"SELECT a.avatar_id FROM avatar a"
+			+ " JOIN spec s ON s.spec_id = a.spec_id"
+			+ " JOIN role r ON r.role_id = s.role_id"
+			+ " WHERE r.slug = 'tank' AND a.is_active = 1"
+			+ " ORDER BY a.gear_score DESC, a.avatar_id;"
+		)
+	)
+	for row in db.query_result:
+		var avatar_id := int(row["avatar_id"])
+		if avatar_id != incumbent_id and avatar_id not in lineup:
+			return RaidPrep.toggle(lineup, avatar_id)
+	return lineup
 
 
 func _parse_seed() -> int:

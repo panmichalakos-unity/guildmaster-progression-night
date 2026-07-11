@@ -1,0 +1,21 @@
+-- 0002 — the defense cap is a SPEC property, not a raw item-level threshold.
+-- MI-003 / ADR-0025.
+--
+-- Crit-immunity used to be `avg_ilvl >= 22` for every tank alike. But gear_score
+-- is just the sum of the same 7 slot item levels, so "crit-immune" was identical
+-- to "best-geared" — and the lineup picker takes tanks greedily by gear_score.
+-- The tank gate is the strongest lever in the game (measured: a 38-point swing on
+-- Gatewarden Krogg, 38% -> 0%), yet the player could never get it wrong and never
+-- fix it: either your best tank was already immune, or your whole tank corps was
+-- under-geared and nothing in the raid-prep screen could help. It was never a
+-- decision.
+--
+-- A per-spec threshold restores the choice. A heavily-armoured protection spec
+-- reaches the cap early; a hide-armoured bruiser must badly over-gear to get
+-- there. So a roster can hand you a high-gear-score tank who is NOT crit-immune
+-- sitting above a lesser-geared one who IS — and the right call is to field the
+-- tank who is "worse" on paper. That is the fight's authored identity and the
+-- first lesson of the game.
+--
+-- 0 = not a tanking spec; the cap does not apply.
+ALTER TABLE spec ADD COLUMN defense_cap_ilvl INTEGER NOT NULL DEFAULT 0;

@@ -124,7 +124,8 @@ static func _participants(db: Variant, lineup: Array[int], overrides: Dictionary
 	db.query_with_bindings(
 		(
 			"SELECT a.avatar_id, a.player_id, p.handle, r.slug AS role_slug,"
-			+ " s.slug AS spec_slug, s.spec_difficulty, a.gear_score, a.item_level,"
+			+ " s.slug AS spec_slug, s.spec_difficulty, s.defense_cap_ilvl,"
+			+ " a.gear_score, a.item_level,"
 			+ " a.familiarity, a.hit_capped, a.uncrittable,"
 			+ " p.execution, p.awareness, p.consistency,"
 			+ " COALESCE(prp.proficiency, 50) AS role_proficiency"
@@ -151,9 +152,13 @@ static func _participants(db: Variant, lineup: Array[int], overrides: Dictionary
 		row["gear_score"] = roundi(float(row["gear_score"]) * gear_multiplier)
 		row["item_level"] = roundi(float(row["item_level"]) * gear_multiplier)
 		# caps DERIVE from gear (gear doc): recompute from the scaled ilvl via
-		# THE shared rule — a 3x-geared tank must not keep its starter
+		# THE shared rule — a heavily-geared tank must not keep its starter
 		# not-uncrittable flag (M6-005 replaces the rule engine-wide later).
-		var caps := AvatarGen.derive_caps(int(row["item_level"]), str(row["role_slug"]))
+		# The threshold is the SPEC's own defense cap, so out-gearing the fight
+		# still will not make a hide-armoured tank crit-immune (ADR-0025).
+		var caps := AvatarGen.derive_caps(
+			int(row["item_level"]), str(row["role_slug"]), int(row["defense_cap_ilvl"])
+		)
 		row["hit_capped"] = caps["hit_capped"]
 		row["uncrittable"] = caps["uncrittable"]
 		row["morale"] = NEUTRAL_STATE["morale"]
