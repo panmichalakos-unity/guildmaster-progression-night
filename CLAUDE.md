@@ -168,11 +168,14 @@ godot --headless --quit
 godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a tests/
 
 # Lint/format (gdtoolkit installed via `uv tool install gdtoolkit`; M0-007)
-gdformat --check sim/ tests/ tools/smoke/
-gdlint sim/ tests/ tools/smoke/
+gdformat --check sim/ game/ tests/ tools/smoke/
+gdlint sim/ game/ tests/ tools/smoke/
 
 # Seed integrity checks (M0-006; stdlib Python, no Godot needed)
 python tools/seed_check.py
+
+# Vertical slice smoke (M4-005)
+godot --headless -s tools/smoke/slice_smoke.gd -- --seed 133742
 
 # Git inspection before/after work
 git status --short

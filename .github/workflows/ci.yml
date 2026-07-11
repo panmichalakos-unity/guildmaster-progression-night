@@ -21,9 +21,9 @@ jobs:
       - name: Install gdtoolkit (pinned to local 4.5.x)
         run: pip install "gdtoolkit==4.5.*"
       - name: gdformat --check
-        run: gdformat --check sim/ tests/ tools/smoke/
+        run: gdformat --check sim/ game/ tests/ tools/smoke/
       - name: gdlint
-        run: gdlint sim/ tests/ tools/smoke/
+        run: gdlint sim/ game/ tests/ tools/smoke/
       - name: Seed integrity checks (stdlib only)
         run: python tools/seed_check.py
 
@@ -38,12 +38,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Import project (build .godot cache on fresh checkout)
         run: godot --headless --import
-      # NOTE: no `godot --headless --quit` step here until M4-001 adds a main
-      # scene — with no main scene the LINUX build exits 1 ("Can't run
-      # project") while the Windows build exits 0, which broke this job (run
-      # 28968513774). The -s smokes below load the project (scripts +
-      # GDExtension) and exit deterministically, so project load IS covered.
-      # TODO(M4-001): re-enable `godot --headless --quit` once a main scene exists.
+      - name: Project boot smoke (M4-001 app shell)
+        # the main scene exists now: boots the shell headless for one frame
+        run: godot --headless --quit
       - name: Unit tests (GdUnit4)
         run: godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a tests/
       - name: Migration smoke
@@ -52,6 +49,8 @@ jobs:
         run: godot --headless -s tools/smoke/seed_smoke.gd
       - name: Roster generation smoke
         run: godot --headless -s tools/smoke/roster_smoke.gd
+      - name: Vertical slice smoke (M4-005)
+        run: godot --headless -s tools/smoke/slice_smoke.gd -- --seed 133742
       - name: Balance harness gate (M3-005)
         # asserts the difficulty-via-margin contract on real seeds: the 60-80%
         # band is reachable, win rates are monotone in gear, and the curve

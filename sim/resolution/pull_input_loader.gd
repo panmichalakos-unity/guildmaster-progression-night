@@ -110,6 +110,9 @@ static func build(
 static func _participants(db: Variant, lineup: Array[int], overrides: Dictionary) -> Array:
 	var gear_multiplier := float(overrides.get("gear_multiplier", 1.0))
 	var consumable_tier := str(overrides.get("consumable_tier", "basic"))
+	# raid-prep assignments (avatar_id -> [{assignment_type, target}]) from the
+	# M4-002 screen. Absent -> the harness-grade auto main-tank default below.
+	var assignments: Dictionary = overrides.get("assignments", {})
 	# ONE query for the whole lineup (was 20 round-trips; review finding).
 	# Rows are re-ordered to lineup order below — participant order drives
 	# rng draw order, so it must stay exactly the caller's order.
@@ -161,8 +164,10 @@ static func _participants(db: Variant, lineup: Array[int], overrides: Dictionary
 			if consumable_tier.is_empty()
 			else [{"slug": "harness_%s" % consumable_tier, "tier": consumable_tier}]
 		)
-		# first tank in gear order = main tank (harness-grade assignment)
-		if str(row["role_slug"]) == "tank" and not main_tank_assigned:
+		if not assignments.is_empty():
+			row["assignments"] = assignments.get(int(avatar_id), [])
+		elif str(row["role_slug"]) == "tank" and not main_tank_assigned:
+			# no prep given: first tank in gear order becomes main tank
 			row["assignments"] = [{"assignment_type": "tank", "target": "main"}]
 			main_tank_assigned = true
 		else:
