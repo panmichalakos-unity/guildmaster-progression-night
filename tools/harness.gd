@@ -21,10 +21,13 @@ extends SceneTree
 ##      spans one-shot to brick wall.
 ## Exits 0 on PASS, 1 on FAIL.
 
-# 0.8 = fresh-roster undergear; 1.25-1.75 = the tier's own drops; 3.0 = next-tier
-# gear on an entry boss ("over-geared vs low tier -> one-shot", the doc's spread).
-# Dense in the transition region so the 60-80% band cannot fall between steps.
-const GEAR_SWEEP: Array[float] = [0.8, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 3.0]
+# MI-001: the REALISTIC in-tier gear band. A raider has 7 slots; starting gear
+# averages ilvl 18.9 and every Tier-1 drop is ilvl 31 -> full BiS is x1.64.
+# The old sweep ran to x3.0 and reported "reachable" win rates at gear the
+# player can NEVER obtain in this tier — which is exactly how three of four
+# bosses stayed uncompletable while the harness passed green.
+# See docs/guildmaster-encounter-contracts.md §0.
+const GEAR_SWEEP: Array[float] = [0.85, 1.0, 1.12, 1.28, 1.42, 1.55, 1.64]
 const DEFAULT_PULLS := 150
 const BASE_SEED := 424242
 const MONOTONE_SLACK := 0.06  # sampling noise allowance between adjacent steps

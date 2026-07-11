@@ -197,3 +197,17 @@ Also fixed: the M3-001 fixtures carried `effect_category="fixture"` (placeholder
 **Also added:** `pull.contributing_factors` — the coupled conditions that made the primary cause fatal (thin healing, low awareness, a non-crit-immune tank, missed duties, bodies lost). This is the groundwork for MI-005's diagnostic hierarchy: **primary cause ≠ culprit.**
 
 **Consequence.** `wipe_reason` can now only be `tank_survival`, `raid_collapse` or `dps_enrage` — healing/mechanic can never be a *primary cause*, only a contributing factor. A near-margin wipe fixture must be built on a gating check (this broke one learning-arc test, which was correct and was updated, not weakened).
+
+## ADR-0024 · 2026-07-11 · Encounter demands are anchored to the gear ceiling, not authored symbolically (MI-001)
+
+**Decision.** Boss demands are no longer free-floating "symbolic" numbers to be tuned later. Every encounter now has a written **progression contract** — expected roster gear, intended win rate, dominant challenge, the player intervention that fixes it, and the seed values that produce it — in `docs/guildmaster-encounter-contracts.md`. That document is the source of truth: **retuning a boss without updating its contract is a bug.**
+
+**The governing constraint — the gear ceiling.** A raider has 7 slots; starting gear averages ilvl 18.9 (`gear_score` 132) and every Tier-1 drop is ilvl 31. Therefore the **realistic in-tier gear band is x1.00 → x1.64.** Anything needing more than ~x1.65 is *unreachable content*. The balance harness swept to **x3.0** and reported healthy win rates at gear the player can never obtain — which is exactly how three of four bosses stayed uncompletable while CI passed green. `GEAR_SWEEP` is now clamped to the real band.
+
+**Why.** The M1-002 encounter demands were authored before a roster generator existed, so nothing tied them to real output. Starting raid DPS is **27.6**; the entry boss demanded **40**. The tier's front door demanded roughly the gear it drops — a hard deadlock, and the other half of the 32-pulls / 0-kills first session.
+
+**Retune (seed rows only — no engine code):** Krogg `24/32/38` · Vell `27/36/30` · Slagbeast `33/68/30` · Cinderlords `42/52/34` (`dps_check` / `healing_check` / `difficulty`).
+
+**Measured effect.** Every boss lands in the 22–35% progression band at its intended gear (Krogg 40% at x1.00 — a *fresh* guild; Vell 29% at x1.12; Slagbeast 31% at x1.28; Cinderlords 22% at x1.42), and each is a wall at the previous boss's gear — so the tier now teaches gearing. `slice_smoke --seed 133742`: **32 pulls / 0 kills → 17 pulls / 4 kills (full tier).** No guild seed produces zero kills. The tank gate is verified as a real lever: **38.5% vs 0.5%** on crit-immunity alone (a 77× swing), which is the arc MI-003 builds on. 117/117 tests green; harness gate PASS.
+
+**Consequence.** The old "**~60–80% win/pull** for matched progression" target in `guildmaster-resolution.md` is **superseded** — at 70%/pull a progression boss dies on pull 1–2, which is a farm feel and contradicts the learning arc's own "8%… 3%… KILL" language. **Progression = 22–35%/pull (kill in 3–8); farm = 65–90%.** MI-009 replaces the harness's single global band-assert on Boss 1 with **per-boss contract assertions** (progression band, farm band, dominant-failure identity), so a boss that only passes on unreachable gear is a *failing* boss.

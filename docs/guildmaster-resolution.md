@@ -57,8 +57,12 @@ P(pass) = sigmoid(margin / scale)
 ## Difficulty via margin (no special-casing)
 Boss difficulty just slides `boss_demand`; the sigmoid does the rest:
 - **Over-geared vs low tier** → big + margin → curve saturates → **one-shot.**
-- **Matched progression** → margin ≈ 0 → **~60–80% win/pull target** (a kill takes a few pulls, not 1, not 20).
+- **Matched progression** → margin ≈ 0 → **22–35% win/pull** → a kill in **3–8 pulls**. This is the "one more pull" zone.
 - **Under-geared** → big − margin → **decisive wipes.**
+
+> ⚠️ **Superseded number — MI-001 (2026-07-11).** This section previously targeted **~60–80% win/pull** for matched content. That was wrong: at 70%/pull a progression boss dies on attempt 1–2, which is a *farm* feel, not progression, and it contradicts the learning arc's own "8%… 3%… KILL" language two sections down. 60–80% is now the **farm-state** band.
+>
+> **Per-boss win-rate, gear, and dominant-failure contracts now live in [`guildmaster-encounter-contracts.md`](guildmaster-encounter-contracts.md)**, which is the source of truth for tuning. Boss demands must never again be authored as free-floating "symbolic" numbers — they are anchored to what a real roster actually produces, inside the realistic **x1.00 → x1.64** in-tier gear band.
 
 ## Learning arc (the emotional core)
 `encounter_progress` — tracked **per guild per encounter**, persists across nights — climbs with attempts and nudges `skill_realization` up / avoidable-death rates down.
