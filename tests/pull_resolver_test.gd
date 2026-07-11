@@ -8,14 +8,20 @@ func _resolve(input: Dictionary, seed_value: int = SimFixture.TEST_SEED) -> Dict
 	return PullResolver.resolve(input, RngStream.derive(seed_value, "pull"))
 
 
-## clean_kill roster with the healing demand pinned ~8 above its own average
-## output and no other failing axis: wipes land with a SMALL blocking margin.
+## clean_kill roster with the DPS demand pinned just above its own output:
+## wipes land with a SMALL blocking margin on a GATING check.
+##
+## MI-002: this used to pin the HEALING demand — but healing is now PRESSURE,
+## not a kill-gate, so a healing shortfall no longer wipes the raid (it makes
+## deaths deadlier instead). A near-margin *wipe* must therefore be built on a
+## gating check (dps or tank). That the old fixture stopped producing wipes is
+## the aggregation fix working as designed.
 func _near_margin_fixture() -> Dictionary:
 	var input: Dictionary = PullFixtures.clean_kill()
 	for p: Dictionary in input["participants"]:
-		p["awareness"] = 55  # neutralize the awareness->healing coupling
+		p["awareness"] = 55  # keep the awareness->healing coupling neutral
 	var probe := Contribution.lanes(input["participants"], input["tuning"], SimFixture.rng("probe"))
-	input["encounter"]["healing_check"] = float(probe["hps"]) + 8.0
+	input["encounter"]["dps_check"] = float(probe["dps"]) + 4.0
 	return input
 
 
@@ -141,8 +147,8 @@ func test_progress_feeds_forward_into_better_pulls() -> void:
 	var practiced := _near_margin_fixture()
 	practiced["encounter_progress"] = {"progress": 90, "attempt_count": 12, "best_attempt_pct": 8}
 
-	var fresh_margin := _healing_margin(_resolve(fresh))
-	var practiced_margin := _healing_margin(_resolve(practiced))
+	var fresh_margin := _contested_margin(_resolve(fresh))
+	var practiced_margin := _contested_margin(_resolve(practiced))
 	(
 		assert_float(practiced_margin)
 		. override_failure_message(
@@ -181,9 +187,10 @@ func _died(row: Dictionary) -> bool:
 	return bool(row["died"])
 
 
-func _healing_margin(result: Dictionary) -> float:
+## The contested GATING margin in `_near_margin_fixture` — dps since MI-002.
+func _contested_margin(result: Dictionary) -> float:
 	for check: Dictionary in result["checks"]:
-		if str(check["check"]) == "healing":
+		if str(check["check"]) == "dps":
 			return float(check["margin"])
 	return 0.0
 

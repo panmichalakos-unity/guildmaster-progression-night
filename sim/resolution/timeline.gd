@@ -30,6 +30,7 @@ const DEFAULTS := {
 	"cooldown_surge_bonus": 0.06,
 	"collapse_death_fraction": 0.3,
 	"severity_learning_rate": 0.08,
+	"healing_deficit_lethality": 0.6,
 }
 
 ## Combat-log outcome vocabulary. RatingEngine keys its deltas on THESE
@@ -46,8 +47,10 @@ const _ATTR_FIELD := {
 	"awareness": "awareness", "consistency": "consistency", "execution": "execution"
 }
 
-# wipe-reason precedence: the dominant failure the raid should diagnose first.
-const _WIPE_PRECEDENCE := ["tank", "collapse", "dps", "healing", "mechanic"]
+# Primary-cause precedence: the failure the raid should diagnose first.
+# MI-002: only these three can END a pull. healing/mechanic are pressure and
+# appear as CONTRIBUTING FACTORS, never as the primary cause of a wipe.
+const _WIPE_PRECEDENCE := ["tank", "collapse", "dps"]
 
 
 ## Runs the full timeline for a pull. Deterministic given (input, rng).
@@ -65,6 +68,13 @@ static func run(input: Dictionary, rng: RngStream) -> Dictionary:
 	var tuning: Dictionary = input["tuning"]
 	var event_rng := rng.substream("events")
 
+	# MI-002: healing PRESSURE is computed up front, from the full raid, and
+	# fed into the timeline — a healing lane that cannot keep up makes death
+	# events deadlier. This is HOW thin healing kills a raid now: through
+	# bodies dropping in the log, not through a phantom independent wipe-roll.
+	var opening_lanes := Contribution.lanes(participants, tuning, rng.substream("contribution"))
+	var healing_deficit := PullChecks.healing_deficit(input, opening_lanes)
+
 	var state := {
 		"deaths": [] as Array[int],
 		"dead_set": {},
@@ -73,6 +83,7 @@ static func run(input: Dictionary, rng: RngStream) -> Dictionary:
 		"assigned_failures": 0,
 		"events": [] as Array[Dictionary],
 		"sequence": 0,
+		"healing_deficit": healing_deficit,
 	}
 
 	# learning arc: encounter familiarity shaves event severity — the raid
@@ -116,10 +127,12 @@ static func run(input: Dictionary, rng: RngStream) -> Dictionary:
 		"deaths": state["deaths"],
 		"outcome": verdict["outcome"],
 		"wipe_reason": verdict["wipe_reason"],
+		"contributing_factors": verdict["contributing_factors"],
 		"progress_pct": verdict["progress_pct"],
 		"checks": checks,
 		"lanes": final_lanes,
 		"dps_surge": float(state["dps_surge"]),
+		"healing_deficit": float(state["healing_deficit"]),
 	}
 
 
@@ -171,10 +184,14 @@ static func _resolve_death(
 	if attribute.is_empty() and state["deaths"].is_empty():
 		_emit(state, event, phase, target, "-", "steadied", "The raid steadies — no cascade.")
 		return
+	# MI-002: a raid whose heals fell behind dies more. The deficit raises the
+	# effective severity of EVERY death event — legible in the log as bodies
+	# dropping, which is the honest expression of "the healing ran dry".
+	var lethality := float(state["healing_deficit"]) * _tune(tuning, "healing_deficit_lethality")
 	var roll := _roll(
 		target,
 		attribute if not attribute.is_empty() else "consistency",
-		float(event["severity"]),
+		float(event["severity"]) + lethality,
 		tuning,
 		rng
 	)
@@ -493,7 +510,10 @@ static func _verdict(
 		not main_tank.is_empty() and dead_set.has(int(main_tank["avatar_id"]))
 	)
 
-	# gather failures in precedence order
+	# MI-002: ONLY gating checks (dps/tank) and raid collapse can wipe. Healing
+	# and mechanic are PRESSURE — they already took their toll during the
+	# timeline (deaths), and they resurface below as contributing factors.
+	# A healthy raid's kill odds are now p(dps) x p(tank), not a 4-way product.
 	var failures: Array[String] = []
 	if main_tank_dead or not bool(by_kind["tank"]["passed"]):
 		failures.append("tank")
@@ -501,21 +521,65 @@ static func _verdict(
 		failures.append("collapse")
 	if not bool(by_kind["dps"]["passed"]):
 		failures.append("dps")
-	if not bool(by_kind["healing"]["passed"]):
-		failures.append("healing")
-	if not bool(by_kind["mechanic"]["passed"]) and not deaths.is_empty():
-		failures.append("mechanic")
 
 	var progress := _progress_pct(by_kind["dps"], death_fraction)
 	if failures.is_empty():
-		return {"outcome": "kill", "wipe_reason": "", "progress_pct": 100}
+		return {
+			"outcome": "kill",
+			"wipe_reason": "",
+			"progress_pct": 100,
+			"contributing_factors": [] as Array[String],
+		}
 
 	var dominant := _dominant(failures)
 	return {
 		"outcome": "wipe",
 		"wipe_reason": _wipe_reason(dominant, by_kind, state, main_tank, main_tank_dead),
 		"progress_pct": progress,
+		# groundwork for the MI-005 diagnostic hierarchy: what made it fatal
+		"contributing_factors": _contributing_factors(by_kind, state, main_tank, death_fraction),
 	}
+
+
+## The coupled conditions that made the primary cause fatal (MI-005). Pressure
+## lanes live HERE — as explanation — not as phantom independent wipes.
+static func _contributing_factors(
+	by_kind: Dictionary, state: Dictionary, main_tank: Dictionary, death_fraction: float
+) -> Array[String]:
+	var factors: Array[String] = []
+	if not bool(by_kind["healing"]["passed"]):
+		factors.append(
+			(
+				"healing lane fell %.1f short — deaths came faster than heals"
+				% absf(float(by_kind["healing"]["margin"]))
+			)
+		)
+	if not bool(by_kind["mechanic"]["passed"]):
+		factors.append(
+			(
+				"raid awareness below the fight's demand (%.1f short) — avoidable damage piled up"
+				% absf(float(by_kind["mechanic"]["margin"]))
+			)
+		)
+	if not main_tank.is_empty() and int(main_tank.get("uncrittable", 0)) == 0:
+		factors.append(
+			"%s is not crit-immune — one spike can end a pull" % main_tank.get("handle", "the tank")
+		)
+	if int(state["assigned_failures"]) > 0:
+		factors.append(
+			(
+				"%d assigned duty/duties missed — unchecked casts hit the raid"
+				% int(state["assigned_failures"])
+			)
+		)
+	if death_fraction > 0.0:
+		factors.append(
+			(
+				"%d raider(s) down by the end — fewer bodies means less output and less healing"
+				% state["deaths"].size()
+			)
+		)
+	return factors
 
 
 static func _dominant(failures: Array[String]) -> String:

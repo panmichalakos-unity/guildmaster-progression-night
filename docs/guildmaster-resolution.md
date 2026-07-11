@@ -7,7 +7,12 @@ Not a combat sim — a **stat-driven probability engine presented as a live even
 
 **Legible failure is the engine.** Every wipe names a check *and* a culprit. The diagnose → adjust → succeed loop is the core fun of the genre — nothing wipes for opaque reasons.
 
-> ⚠️ **REWORK PENDING — MI-002 (2026-07-11).** As implemented, stage 3 rolls all four checks *independently* and requires **all** to pass, which caps even a healthy raid at ~41% and double-counts failure: the timeline already punishes low awareness (avoidable deaths) and thin healing (cascade deaths) through **events**, then the mechanic/healing *checks* punish them again. Combined with encounter demands never tied to real roster output, the default first session is 32 pulls / 0 kills. MI-002 reworks aggregation so **DPS/enrage + tank survival drive kill-vs-wipe**, and the soft lanes apply *pressure* (feeding events and margins) rather than acting as independent kill-gates. See `guildmaster-intervention-and-realignment.md` §10.1.
+> ✅ **STAGE 3 REWORKED — MI-002 (2026-07-11), ADR-0023.** Checks are now of **two kinds**:
+>
+> - **GATING — `dps` and `tank`.** Rolled through the sigmoid; these alone decide kill vs wipe. DPS/enrage is the race; tank survival is the near-binary gate (a non-uncrittable main tank eats a flat margin penalty). A healthy raid's odds are now **p(dps) × p(tank)** — not a four-way product.
+> - **PRESSURE — `healing` and `mechanic`.** *Not* rolled and *never* a kill-gate. They report whether the lane met its demand, and their real teeth are in the **timeline**: a healing shortfall raises the effective severity of every death event (`healing_deficit_lethality`), and low awareness already drives avoidable deaths. Deaths piling past the collapse threshold still wipe the raid — that is how healing/mechanic failure stays lethal: *the raid runs out of bodies.*
+>
+> **Why:** previously all four rolled independently and *all* had to pass, capping even a healthy raid at ~41% **and double-counting failure** — the timeline already punished low awareness and thin healing through events, then the checks punished them again. Pressure lanes now surface as **contributing factors** in the diagnosis, never as phantom independent wipes. See `guildmaster-intervention-and-realignment.md` §10.1.
 
 ## Pipeline (5 stages)
 

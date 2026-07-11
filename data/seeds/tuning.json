@@ -1,11 +1,18 @@
 {
 	"_comment": "Starter tuning constants (M1-003). EVERY value here is a symbolic placeholder — the M3-005 batch harness and playtesting are the real judges. Namespaced by system; sim code reads this file directly (it is config seed data, not a DB table). Change values freely; change KEY NAMES only with a cross-validated ticket.",
 	"resolution": {
-		"winrate_target_band": [0.6, 0.8],
+		"winrate_target_band": [
+			0.6,
+			0.8
+		],
 		"sigmoid_scale": 12,
 		"hard_check_sigmoid_scale": 7,
 		"tank_healing_share": 0.35,
-		"reference_comp": {"tank": 2, "healer": 5, "dps": 13},
+		"reference_comp": {
+			"tank": 2,
+			"healer": 5,
+			"dps": 13
+		},
 		"contribution_variance": 0.1,
 		"ceiling_per_ilvl": 2.2,
 		"uncrittable_gate_penalty": 25,
@@ -27,7 +34,8 @@
 		"wipe_morale": -2,
 		"death_morale": -1,
 		"save_morale": 2,
-		"form_rate": 0.8
+		"form_rate": 0.8,
+		"healing_deficit_lethality": 0.6
 	},
 	"gear": {
 		"spec_fit_multiplier": 0.5,
@@ -47,9 +55,18 @@
 	"roster": {
 		"stars_share": 0.15,
 		"fringe_share": 0.25,
-		"talent_star": [75, 8],
-		"talent_core": [52, 12],
-		"talent_fringe": [38, 10],
+		"talent_star": [
+			75,
+			8
+		],
+		"talent_core": [
+			52,
+			12
+		],
+		"talent_fringe": [
+			38,
+			10
+		],
 		"experience_by_preset": {
 			"young_gun": 25,
 			"student": 30,
@@ -72,6 +89,9 @@
 			"melee": 8,
 			"ranged": 9
 		},
-		"starter_ilvl_band": [14, 22]
+		"starter_ilvl_band": [
+			14,
+			22
+		]
 	}
 }

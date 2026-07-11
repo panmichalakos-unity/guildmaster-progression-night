@@ -1,32 +1,57 @@
 class_name PullChecks
 extends RefCounted
 
-## Resolution stage 3 (M3-002 / M3a): margin -> sigmoid check resolution.
+## Resolution stage 3 (M3-002 / M3a; REWORKED by MI-002, ADR-0023).
 ##
 ##   margin  = raid_output - boss_demand
-##   P(pass) = sigmoid(margin / scale)
+##   P(pass) = sigmoid(margin / scale)      [GATING checks only]
 ##
-## Saturated margin -> decisive (one-shot or clean wipe); margin ~ 0 -> the
-## coin-flip zone the 60-80% win-rate target lives in. HARD checks (tank
-## survival, dps/enrage) use the steeper curve — a cliff, not a slope. The
-## tank check is deliberately near-binary: a non-uncrittable main tank eats
-## a flat margin penalty (the era-authentic gear gate).
+## TWO KINDS OF CHECK. Previously all four were independent rolls that ALL had
+## to pass — which capped even a healthy raid at ~41% and DOUBLE-COUNTED
+## failure, because the timeline already punishes low awareness (avoidable
+## deaths) and thin healing (cascade deaths) through EVENTS.
 ##
-## Every check carries a `detail` string naming numbers AND a culprit hint —
-## the legible-failure fodder wipe_reason (M3-004) and the why-view read.
+##   GATING   (dps, tank) — rolled; these alone decide kill vs wipe.
+##            DPS/enrage is the race; tank survival is the near-binary gate
+##            (a non-uncrittable main tank eats a flat margin penalty).
+##
+##   PRESSURE (healing, mechanic) — NOT rolled, NOT kill-gates. `passed` simply
+##            reports whether the lane met its demand (margin >= 0). Their real
+##            teeth are in the TIMELINE: a healing deficit makes death events
+##            deadlier (see `healing_deficit`), and low awareness already drives
+##            avoidable deaths. They surface as CONTRIBUTING FACTORS in the
+##            diagnosis — never as a phantom independent wipe.
+##
+## Deaths piling past the collapse threshold still wipe the raid, which is how
+## healing/mechanic failure remains lethal: the raid runs out of bodies.
+##
+## Every check carries a `detail` string naming numbers AND the weakest link —
+## the legible-failure fodder wipe_reason and the why-view read.
 
 const DEFAULTS := {
 	"sigmoid_scale": 12.0,
 	"hard_check_sigmoid_scale": 7.0,
 	"uncrittable_gate_penalty": 25.0,
 	"tank_healing_share": 0.35,
+	"healing_deficit_lethality": 0.6,
 }
 
+## The checks that decide kill vs wipe. Everything else is pressure.
+const GATING_CHECKS := ["dps", "tank"]
 const HARD_CHECKS := ["dps", "tank"]
 
 
-## Resolves the four M3a checks against aggregated lanes. Deterministic given
-## (input, lane_data, rng). Returns contract-shaped checks[] (PullContracts).
+## How far the healing lane fell short of its demand (0.0 when it kept up).
+## The TIMELINE reads this to make death events deadlier — this is HOW thin
+## healing kills a raid now, instead of an independent wipe-roll.
+static func healing_deficit(input: Dictionary, lane_data: Dictionary) -> float:
+	var demands := Contribution.demands(input, lane_data)
+	return maxf(0.0, float(demands["healing"]) - float(lane_data["hps"]))
+
+
+## Resolves the four checks against aggregated lanes. Deterministic given
+## (input, lane_data, rng). Returns contract-shaped checks[] (PullContracts),
+## each carrying `gating` so the verdict knows what may wipe the raid.
 static func resolve(input: Dictionary, lane_data: Dictionary, rng: RngStream) -> Array[Dictionary]:
 	var demands := Contribution.demands(input, lane_data)
 	var checks: Array[Dictionary] = []
@@ -57,12 +82,28 @@ static func _check(
 	rng: RngStream
 ) -> Dictionary:
 	var margin := output - demand
+	var gating := kind in GATING_CHECKS
+	if not gating:
+		# PRESSURE check: no roll, no kill-gate. It simply reports whether the
+		# lane kept up; the timeline turns a shortfall into deaths (MI-002).
+		return {
+			"check": kind,
+			"margin": margin,
+			"passed": margin >= 0.0,
+			"gating": false,
+			"detail":
+			(
+				"%s %.1f vs demand %.1f (margin %+.1f — pressure, not a kill-gate)%s"
+				% [kind, output, demand, margin, _culprit_hint(kind, lane_data)]
+			),
+		}
 	var probability := pass_probability(margin, kind, input["tuning"])
 	var passed := rng.randf() < probability
 	return {
 		"check": kind,
 		"margin": margin,
 		"passed": passed,
+		"gating": true,
 		"detail":
 		(
 			"%s %.1f vs demand %.1f (margin %+.1f, p=%.2f)%s"
@@ -100,6 +141,7 @@ static func _tank_check(
 		"check": "tank",
 		"margin": margin,
 		"passed": passed,
+		"gating": true,
 		"detail":
 		(
 			"tank %.1f (+%.1f heals) vs demand %.1f (margin %+.1f, p=%.2f)%s; main tank: %s"

@@ -185,3 +185,15 @@ Also fixed: the M3-001 fixtures carried `effect_category="fixture"` (placeholder
 - **I-10 (quirks/events in v1) deliberately NOT decided** — the doc's own guidance is to decide on playtest evidence after the Fun Gate.
 
 **Consequence.** The Fun Gate is a **human verdict** (MI-010), scored against the card in `content-and-dod`. A weak score means tune/present/clarify — never "add more systems". No Phase-B ticket starts until MI-010 passes.
+
+## ADR-0023 · 2026-07-11 · Gating vs pressure checks (MI-002)
+
+**Decision.** Stage-3 checks split into two kinds. **GATING** (`dps`, `tank`) are rolled and alone decide kill vs wipe. **PRESSURE** (`healing`, `mechanic`) are never rolled and never gate a kill; they report whether the lane met its demand and exert their force through the **timeline** — a healing shortfall raises the effective severity of every death event (new `healing_deficit_lethality`), while low awareness already drives avoidable deaths. Deaths past the collapse threshold still wipe the raid, so soft-lane failure remains lethal *by killing bodies*, which is legible in the log.
+
+**Why.** The old rule rolled all four independently and required all to pass. Two faults: (1) it capped even a healthy raid at ~41% (0.8⁴); (2) it **double-counted** — the timeline already punished low awareness (avoidable deaths) and thin healing (cascade deaths) via events, then the checks punished the same failures again. This was half the reason the default first session was 32 pulls / 0 kills.
+
+**Measured effect (aggregation fix alone, no content changes):** Krogg 1%→8% at x1.0 gear and 55%→81% at x2.0; Vell 7%→31%, Slagbeast 3%→43%, Cinderlords 2%→26% at x2.0. Later bosses became reachable at all. 117/117 tests green; harness shape-asserts still PASS.
+
+**Also added:** `pull.contributing_factors` — the coupled conditions that made the primary cause fatal (thin healing, low awareness, a non-crit-immune tank, missed duties, bodies lost). This is the groundwork for MI-005's diagnostic hierarchy: **primary cause ≠ culprit.**
+
+**Consequence.** `wipe_reason` can now only be `tank_survival`, `raid_collapse` or `dps_enrage` — healing/mechanic can never be a *primary cause*, only a contributing factor. A near-margin wipe fixture must be built on a gating check (this broke one learning-arc test, which was correct and was updated, not weakened).

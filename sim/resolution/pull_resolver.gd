@@ -53,6 +53,9 @@ static func resolve(input: Dictionary, rng: RngStream) -> Dictionary:
 	result["pull"] = {
 		"outcome": outcome,
 		"wipe_reason": str(timeline["wipe_reason"]),
+		# MI-002/MI-005: the primary cause is `wipe_reason`; these are the
+		# coupled conditions that made it fatal. The report shows both.
+		"contributing_factors": timeline["contributing_factors"],
 		"duration_sec": _duration(outcome, timeline),
 		"attempt_number": int(input["attempt_number"]),
 		"boss_hp_pct_at_end": 0 if outcome == "kill" else 100 - int(timeline["progress_pct"]),
