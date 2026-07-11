@@ -15,8 +15,31 @@ const ACCENT := Color("d97a32")  # ember
 const DANGER := Color("c0392b")
 const GOOD := Color("27ae60")
 
+## MI-004 — the notability palette. The combat log's job is to make the moment the
+## pull TURNED legible at a glance, so the four tiers must be separable in
+## peripheral vision: routine recedes, decisive shouts. See
+## docs/guildmaster-presentation.md and PullContracts.notability_for().
+const ROUTINE := Color("6e727a")  # texture; the fight breathing
+const NOTABLE := Color("d8d5cd")  # worth reading
+const CRITICAL := Color("e08a4a")  # somebody died / a duty dropped
+const DECISIVE := Color("ff5544")  # the pull turned HERE
+const TRIUMPH := Color("e8c266")  # gold — reserved for a kill, nothing else
+
 const FONT_SIZE := 15
 const FONT_SIZE_TITLE := 28
+
+
+## BBCode colour for a notability tier (PullContracts.notability_for()).
+static func notability_color(notability: String) -> Color:
+	match notability:
+		"decisive":
+			return DECISIVE
+		"critical":
+			return CRITICAL
+		"notable":
+			return NOTABLE
+		_:
+			return ROUTINE
 
 
 static func build() -> Theme:

@@ -78,6 +78,9 @@ static func resolve_pull(
 		"encounter_slug": encounter_slug,
 		"encounter_name": encounter_name(db, encounter_slug),
 		"attempt_number": attempt_number,
+		# the feed titles its phase banners from these (MI-004); events only
+		# carry phase_order, and a bare "PHASE 2" is not a beat the player feels
+		"phases": input["phases"],
 	}
 
 

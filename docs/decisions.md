@@ -231,3 +231,17 @@ Also fixed: the M3-001 fixtures carried `effect_category="fixture"` (placeholder
 **The arc, measured (10/10 seeds).** Default lineup: **1–3% win**, dominant wipe `tank_survival`, and raid prep says so *before the pull* ("Main tank X is not uncrittable — spike-death risk"). Bench the star tank → a crit-immune tank inherits the duty → **21–46% win, a kill in 2.2–4.7 pulls.** On the demo seed: **3.3% → 40.7%, a kill in ~2.5 pulls.**
 
 **Consequence.** Night One deliberately does **not** stack comp/healing/range flaws on top — one legible cause, one decision, or the player cannot tell which fix mattered. `game/demo_campaign.gd` is slice scaffolding: **M5-001's guild genesis must carry this contract forward**, or the game loses its opening. MI-010 (the human Fun Gate) scores this session.
+
+## ADR-0027 · 2026-07-11 · The fight says how it ended; notability is derived (MI-004)
+
+**Decision.** Two things, both in the engine, because the combat log is a thin renderer and the show's failures were not styling failures.
+
+**1 — Every pull closes with its own `decisive` beat.** `Timeline._emit_closing_beat` appends a short human line naming how the fight ended (`boss_down` / `wipe_call`). **Why:** the verdict was computed *after* the timeline and **never written into the log**. A first-session tank-gate wipe read as four routine lines and then a verdict from nowhere — the decisive moment was not in the show at all, and no amount of colour could add it. `wipe_reason` remains a precise diagnostic string; it is far too long to be a beat and belongs on the card.
+
+**2 — Notability is DERIVED from the event outcome, never stored** (`PullContracts.notability_for()`, tiers `routine / notable / critical / decisive`). A stored tier is a fact that can drift from the fact it describes. Every surface that renders events — the combat log, MI-005's why-view, a future replay — calls the same classifier, so they cannot disagree about what mattered. Unrecognised outcomes fall to `routine`: a new event type is texture until somebody tiers it, which fails quiet instead of crying wolf.
+
+**Also.** Phase changes render as ruled banners titled with the phase's real name (`NightRunner` now hands the screen `phases[]`; events carry only `phase_order`). The wipe card shows `boss to N%` against the running best — **"CLOSEST YET"** — which is the "one more pull" line and the entire reason a raider stays. Pacing: Live (0.45s/beat, 1x–4x) or Instant, with skip-to-result.
+
+**Deliberately NOT done: a live boss-health bar.** The engine does not model boss HP over time — it derives final progress from the DPS-check margin. A smoothly draining bar would be the feed **inventing a number the simulation never computed**, which is the exact class of failure this intervention exists to stop. Boss health is reported where it is real: as the outcome. A live bar requires the engine to model HP per phase first, and that is a ticket, not a UI tweak.
+
+**Consequence / open issue.** A `tank_survival` wipe currently marks **nobody dead** — the tank check fails as a *check*, no death event fires, so `participants[].died` is false for all and the post-night report can show 0 deaths on a wipe caused by the tank dying. The log now handles this honestly (the beat says "cannot hold it", not "is cut down"; the raid counter drops to 0 because a wipe *is* a wipe), but the incoherence is real and is assigned to **MI-005**: either the tank gate emits a real `tank_death` event, or the report stops implying deaths it does not have.

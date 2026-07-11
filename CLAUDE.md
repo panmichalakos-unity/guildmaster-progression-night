@@ -46,6 +46,7 @@ Doc map:
 | `guildmaster-resolution.md` | raid-night resolution engine, checks, events, learning arc, ratings |
 | `guildmaster-encounter-contracts.md` | **per-boss tuning contracts** — expected gear, win-rate bands, dominant challenge, the gear ceiling. Retuning a boss without updating its contract is a bug |
 | `guildmaster-first-session.md` | **the Night One contract** — the curated first session that must teach diagnose → fix → succeed |
+| `guildmaster-presentation.md` | **the raid-night show** — notability hierarchy, phase beats, the closing beat, "closest yet", pacing |
 | `guildmaster-raid-prep.md` | lineup, comp warnings, assignments, benching, consumable plan |
 | `guildmaster-gear.md` | 7-slot gear model, `gear_score`, caps, spec-fit, Marks |
 | `guildmaster-loot.md` | Council/DKP/roll, claims panel, fairness consequences |

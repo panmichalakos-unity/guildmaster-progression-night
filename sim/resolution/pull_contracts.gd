@@ -26,6 +26,25 @@ const ROLES := ["tank", "healer", "melee", "ranged"]
 const TARGET_SELECTORS := ["tank", "healer", "melee", "ranged", "random", "assigned"]
 const CHECK_KINDS := ["dps", "healing", "tank", "mechanic", "assigned_duty"]
 
+## MI-004 — THE NOTABILITY HIERARCHY. A correct event list can still be
+## emotionally flat: if every beat is rendered the same weight, the player reads
+## a spreadsheet and cannot feel the moment the pull turned. Notability is the
+## contract that lets a renderer separate texture from drama.
+##
+## It is DERIVED from the event's outcome, never stored. A stored tier is a fact
+## that can drift from the fact it describes; a derived one cannot. Every surface
+## that shows events (the combat log, the MI-005 why-view, a future replay) calls
+## THIS, so they cannot disagree about what mattered.
+const NOTABILITY := ["routine", "notable", "critical", "decisive"]
+
+## The pull turned here. A tank death IS the wipe — it is not one beat among many —
+## and `boss_down` / `wipe_call` are the fight's own closing beat (Timeline).
+const _DECISIVE_OUTCOMES := ["tank_death", "boss_down", "wipe_call"]
+## Somebody died, a duty was dropped, or a life was stolen back. Real consequence.
+const _CRITICAL_OUTCOMES := ["death", "duty_fail", "save"]
+## Tension and payoff — the fight breathing. Worth reading, not worth panicking.
+const _NOTABLE_OUTCOMES := ["survived", "surge"]
+
 ## PullInput required keys (see _INPUT_SPEC for nesting):
 ##   encounter:  slug, dps_check, healing_check, difficulty, phase_count
 ##   phases:     [{slug, phase_order, entry_condition}]
@@ -59,6 +78,19 @@ const _PARTICIPANT_INT_FIELDS: Array[String] = [
 	"fatigue",
 	"form",
 ]
+
+
+## The drama weight of an event outcome. Anything unrecognised is routine: a new
+## event type is texture until somebody decides otherwise, which fails quiet
+## rather than screaming a false alarm at the player.
+static func notability_for(event_outcome: String) -> String:
+	if event_outcome in _DECISIVE_OUTCOMES:
+		return "decisive"
+	if event_outcome in _CRITICAL_OUTCOMES:
+		return "critical"
+	if event_outcome in _NOTABLE_OUTCOMES:
+		return "notable"
+	return "routine"
 
 
 ## Empty-but-valid input skeleton; fixtures/loaders fill it in.

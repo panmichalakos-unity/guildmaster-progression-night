@@ -46,8 +46,8 @@ static func build(
 	var input := PullContracts.make_input()
 	db.query_with_bindings(
 		(
-			"SELECT encounter_id, slug, dps_check, healing_check, difficulty, phase_count"
-			+ " FROM encounter WHERE slug = ?;"
+			"SELECT encounter_id, slug, display_name, dps_check, healing_check, difficulty,"
+			+ " phase_count FROM encounter WHERE slug = ?;"
 		),
 		[encounter_slug]
 	)
@@ -56,6 +56,8 @@ static func build(
 	var encounter_id := int(encounter["encounter_id"])
 	input["encounter"] = {
 		"slug": str(encounter["slug"]),
+		# the timeline's closing beat names the boss out loud (MI-004)
+		"display_name": str(encounter["display_name"]),
 		"dps_check": int(encounter["dps_check"]),
 		"healing_check": int(encounter["healing_check"]),
 		"difficulty": int(encounter["difficulty"]),
@@ -64,7 +66,7 @@ static func build(
 
 	db.query_with_bindings(
 		(
-			"SELECT slug, phase_order, entry_condition FROM encounter_phase"
+			"SELECT slug, phase_order, entry_condition, display_name FROM encounter_phase"
 			+ " WHERE encounter_id = ? ORDER BY phase_order;"
 		),
 		[encounter_id]

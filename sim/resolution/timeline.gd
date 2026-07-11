@@ -42,6 +42,12 @@ const OUTCOME_DUTY_OK := "duty_ok"
 const OUTCOME_SAVE := "save"
 const OUTCOME_SURGE := "surge"
 const OUTCOME_SURVIVED := "survived"
+## MI-004 — HOW THE PULL ENDED. The verdict used to be computed after the
+## timeline and never written into the log, so a tank-gate wipe read as four
+## forgettable lines and then a verdict from nowhere: the decisive moment was
+## missing from the show entirely. The fight now says out loud how it ended.
+const OUTCOME_BOSS_DOWN := "boss_down"
+const OUTCOME_WIPE_CALL := "wipe_call"
 
 const _ATTR_FIELD := {
 	"awareness": "awareness", "consistency": "consistency", "execution": "execution"
@@ -122,6 +128,7 @@ static func run(input: Dictionary, rng: RngStream) -> Dictionary:
 	var checks := PullChecks.resolve(input, final_lanes, rng.substream("checks"))
 
 	var verdict := _verdict(input, checks, state, final_lanes)
+	_emit_closing_beat(input, state, verdict)
 	return {
 		"events": state["events"],
 		"deaths": state["deaths"],
@@ -493,6 +500,40 @@ static func _roll_value(
 
 
 # --- outcome ------------------------------------------------------------------
+
+
+## The climax. `wipe_reason` is a diagnostic string — precise, and far too long to
+## be a beat — so the log gets a short human line for how the fight actually
+## ended, in the last phase, at the top of the notability hierarchy. Without it
+## the feed has no ending: the player watches a few routine beats and then a
+## verdict materialises with nothing in the log to explain it.
+static func _emit_closing_beat(input: Dictionary, state: Dictionary, verdict: Dictionary) -> void:
+	var phases := _sorted_phases(input["phases"])
+	var last_phase: Dictionary = (
+		phases[phases.size() - 1] if not phases.is_empty() else {"phase_order": 1}
+	)
+	var boss := str(input["encounter"].get("display_name", "The boss"))
+
+	if str(verdict["outcome"]) == "kill":
+		_emit(state, {}, last_phase, {}, "-", OUTCOME_BOSS_DOWN, "%s falls. KILL." % boss)
+		return
+
+	var main_tank := Contribution.find_main_tank(input["participants"])
+	var tank_handle := str(main_tank.get("handle", "the main tank"))
+	var line := ""
+	match str(verdict["wipe_reason"]).get_slice(":", 0):
+		"tank_survival":
+			# careful: a failed tank CHECK is not necessarily a logged death event,
+			# so this must not claim a corpse the log does not contain
+			line = "%s cannot hold it — the boss breaks through the raid. WIPE." % tank_handle
+		"raid_collapse":
+			line = (
+				"%d raiders down — there is nobody left to hold it together. WIPE."
+				% state["deaths"].size()
+			)
+		_:
+			line = "%s enrages with the raid still swinging. WIPE." % boss
+	_emit(state, {}, last_phase, {}, "-", OUTCOME_WIPE_CALL, line)
 
 
 static func _verdict(
