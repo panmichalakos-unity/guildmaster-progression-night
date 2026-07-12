@@ -34,11 +34,16 @@ A persistent strip, above the feed. Every field is a fact the engine actually pr
 | Boss `n/4` · name · attempt | `NightRunner` | — |
 | **Phase** `n — <name>` | `event.phase_order` + the runner's `phases[]` | ✅ updates as the fight moves |
 | **Raiders up** `18/20` | death events, counted as they fire | ✅ |
-| **Furthest yet** `boss to 41%` | `boss_hp_pct_at_end`, best over attempts | — |
+| **Closest yet** `boss down to 41% health` | `boss_hp_pct_at_end`, **lowest** over attempts | — |
 
 ### 🔒 There is deliberately **no live boss-health bar**
 
-The engine **does not model boss HP over time.** It derives final progress from the DPS-check margin at the end of the pull. A bar draining smoothly through the fight would be the feed **inventing a number the simulation never computed** — a lie about the sim, and exactly the class of thing this project's intervention exists to stop. Boss health is therefore reported where it is real: **as the outcome** ("boss to 23%").
+The engine **does not model boss HP over time.** It derives final progress from the DPS-check margin at the end of the pull. A bar draining smoothly through the fight would be the feed **inventing a number the simulation never computed** — a lie about the sim, and exactly the class of thing this project's intervention exists to stop. Boss health is therefore reported where it is real: **as the outcome** ("boss left at 23% health").
+
+> ### 🔒 The screen speaks REMAINING HEALTH. Lower is better.
+> The engine thinks in **`progress`** (`100 − hp`, where *higher* is better). The player watches a **health bar** (where *lower* is better). **These run in opposite directions**, and conflating them is a real bug that shipped: the card computed `progress` and printed it under a health label, so a raid that pushed the boss down to **40% health** was told *"Boss to 60%"* — and **"furthest yet" announced a guild's best attempt using its worst-sounding number.**
+>
+> One rule, in one place: `CombatLogScreen.is_closer(boss_hp, previous_best_hp)` → `boss_hp < previous_best_hp`. Guarded by `tests/best_attempt_test.gd`. **Never print `progress` to a player.**
 
 *If we want a live bar later, the engine must model HP per phase first.* That is a real ticket, not a UI tweak.
 
@@ -92,14 +97,14 @@ The pull ends on a card that answers the only question the player actually has.
 
 **On a wipe** — name the cause, name what made it fatal, and then the line that keeps a raider pulling:
 > **WIPE — tank_survival**
-> **Boss to 60%** · **CLOSEST YET** (previous best 41%) · 3:12
+> **Boss left at 38% health** · **CLOSEST YET** (previous best: 41%) · 3:12
 > · healing lane fell 7.8 short — deaths came faster than heals
 > · Shadowwhisper is not crit-immune — one spike can end a pull
 
 | Comparison | Shown when |
 |---|---|
 | *"first attempt — that is your benchmark"* | no prior attempt |
-| **"CLOSEST YET"** (gold) + previous best | this attempt got further than any before |
+| **"CLOSEST YET"** (gold) + previous best | this attempt left the boss on **less health** than any before |
 | *"matched your best"* | tie |
 | *"your best is still 41%"* | worse |
 

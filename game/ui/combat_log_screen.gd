@@ -30,9 +30,17 @@ var _boss_index := 0
 var _attempt := 1
 var _history: Array[Dictionary] = []
 
-## The PREVIOUS best progress per boss — the baseline "were we closer?" compares
-## against. Updated only AFTER a pull is scored, or the answer is always "no".
-var _best_pct: Dictionary = {}
+## The LOWEST boss health any attempt has left on this boss — the closest the guild
+## has come. Keyed by boss slug, updated only AFTER a pull is scored (or the answer
+## to "were we closer?" is always "no").
+##
+## LOWER IS BETTER. This screen speaks the boss's REMAINING HEALTH, which is what
+## the player watches. The engine thinks in `progress` (100 - hp, higher is better),
+## and mixing the two is exactly the bug this replaced: the card computed progress
+## and then printed it under the words "Boss to 60%", so a raid that pushed the boss
+## down to 40% health was told it had left it at 60% — and "furthest yet" reported
+## the guild's BEST attempt using its worst-sounding number.
+var _best_hp: Dictionary = {}
 
 # live pull state
 var _queue: Array[Dictionary] = []
@@ -391,8 +399,12 @@ func _render_outcome(step: Dictionary) -> void:
 	var pull: Dictionary = step["result"]["pull"]
 	var slug := str(step["encounter_slug"])
 	var outcome := str(pull["outcome"])
-	var progress := 100 - int(pull["boss_hp_pct_at_end"])
-	var previous_best := int(_best_pct.get(slug, 0))
+	# the boss's REMAINING health — the bar the player actually watches. Lower is
+	# better. (The engine's `progress` is 100 - this; do not print that number under
+	# a health label, which is precisely the bug this replaced.)
+	var boss_hp := int(pull["boss_hp_pct_at_end"])
+	var attempted := _best_hp.has(slug)
+	var previous_best := int(_best_hp.get(slug, 100))
 
 	# the feed already closed with the fight's own gold "boss_down" beat — the card
 	# is the aftermath, not a second victory lap
@@ -417,10 +429,17 @@ func _render_outcome(step: Dictionary) -> void:
 		# is internal shorthand full of margins and probabilities, and it names the
 		# main tank in a way that reads like an accusation.
 		var diagnosis: Dictionary = pull.get("diagnosis", {})
-		lines.append(
-			(
-				"[b]Boss to %d%%[/b]  ·  %s  ·  %s"
-				% [progress, _closeness(progress, previous_best), _clock(int(pull["duration_sec"]))]
+		(
+			lines
+			. append(
+				(
+					"[b]Boss left at %d%% health[/b]  ·  %s  ·  %s"
+					% [
+						boss_hp,
+						_closeness(boss_hp, previous_best, attempted),
+						_clock(int(pull["duration_sec"])),
+					]
+				)
 			)
 		)
 		if diagnosis.is_empty():
@@ -441,22 +460,31 @@ func _render_outcome(step: Dictionary) -> void:
 		)
 		_set_card("WIPE — %s" % str(diagnosis["primary_cause_label"]), ThemeBuilder.DANGER, lines)
 
-	_best_pct[slug] = maxi(previous_best, progress)
+	# the best attempt is the one that pushed the boss FURTHEST DOWN
+	_best_hp[slug] = mini(previous_best, boss_hp) if attempted else boss_hp
 
 
 ## The "one more pull" line. A wipe that got further than any before it is not a
 ## failure the player wants to walk away from — it is the reason they stay.
-func _closeness(progress: int, previous_best: int) -> String:
-	if previous_best <= 0:
+func _closeness(boss_hp: int, previous_best: int, attempted: bool) -> String:
+	if not attempted:
 		return "first attempt — that is your benchmark"
-	if progress > previous_best:
+	if is_closer(boss_hp, previous_best):
 		return (
-			"[color=#%s][b]CLOSEST YET[/b][/color] (previous best %d%%)"
+			"[color=#%s][b]CLOSEST YET[/b][/color] (previous best: %d%%)"
 			% [ThemeBuilder.TRIUMPH.to_html(false), previous_best]
 		)
-	if progress == previous_best:
+	if boss_hp == previous_best:
 		return "matched your best"
 	return "your best is still %d%%" % previous_best
+
+
+## THE RULE, in one place so it is testable and cannot drift again: an attempt is
+## CLOSER when it leaves the boss on LESS health. The screen reports the boss's
+## remaining health, not the raid's progress — and the two run in opposite
+## directions, which is how the original bug called a guild's best night its worst.
+static func is_closer(boss_hp: int, previous_best_hp: int) -> bool:
+	return boss_hp < previous_best_hp
 
 
 func _clock(seconds: int) -> String:
@@ -508,8 +536,11 @@ func _refresh_status() -> void:
 	if not _is_revealing():
 		_phase_label.text = ""
 	_refresh_alive()
-	var best := int(_best_pct.get(slug, 0))
-	_best_label.text = "" if best <= 0 else "furthest yet: boss to %d%%" % best
+	# lower is better: this is the boss's remaining health at your closest attempt
+	var best := int(_best_hp.get(slug, 100))
+	_best_label.text = (
+		"" if not _best_hp.has(slug) else "closest yet: boss down to %d%% health" % best
+	)
 	_pull_button.disabled = false
 	_next_button.disabled = false
 
