@@ -191,6 +191,27 @@ git diff
 
 If a tool/addon is not installed yet, report that directly and continue with the checks that are available. Do not fake green test output.
 
+### ⚠️ Looping `gdsqlite` GDExtension error in the editor — cause and fix
+
+**Symptom:** the Godot editor spams, on repeat:
+
+```text
+ERROR: Failed to open '.../addons/godot-sqlite/bin/~libgdsqlite.windows.template_debug.x86_64.dll'
+ERROR: Error copying library: .../libgdsqlite.windows.template_debug.x86_64.dll
+ERROR: Can't open GDExtension dynamic library: 'res://addons/godot-sqlite/gdsqlite.gdextension'
+ERROR: Error loading extension: 'res://addons/godot-sqlite/gdsqlite.gdextension'
+```
+
+**Cause.** Godot copies a GDExtension DLL to a `~`-prefixed temp file so it can hot-reload it. Running a **second Godot process while the editor is open** (i.e. any `godot --headless …` command during a session) makes that copy fail, and Windows leaves a `~libgdsqlite.windows.template_debug.x86_64.dll~RF*.TMP` turd behind. They **accumulate silently** — one per session — until one collides with the copy target, the extension fails to load, and the editor **retries forever**. The game code is not involved.
+
+**Fix (safe — they are gitignored build turds, never tracked):**
+
+```bash
+rm -f addons/godot-sqlite/bin/'~libgdsqlite'*.TMP
+```
+
+Then restart the editor. **Prevention:** close the Godot editor before running headless commands — the same rule that already applies to `--headless --quit`. If you must run both, sweep `bin/` afterwards.
+
 ## Hermes / Cursor / Codex Workflow
 
 ```text
