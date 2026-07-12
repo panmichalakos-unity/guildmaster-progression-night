@@ -58,7 +58,11 @@ jobs:
       - run: pip install gdtoolkit duckdb pandas && gdlint sim/ game/
       - run: python tools/seed_check.py
       - run: godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/
-      - run: godot --headless -s tools/harness.gd -- --pulls 2000 --assert-winrate 0.6 0.8
+      # MI-009: per-boss contract asserts + prep-leverage probes. NOT the old
+      # `--assert-winrate LO HI` (removed) — that was ONE global band on boss 1,
+      # and it passed green while three of four bosses sat at a 0% win rate.
+      - run: godot --headless -s tools/harness.gd -- --pulls 150 --assert-contracts
+      - run: godot --headless -s tools/harness.gd -- --probes --pulls 150
   export:
     if: startsWith(github.ref, 'refs/tags/')
     # godot export presets → Windows (primary), Linux (cheap); artifact upload

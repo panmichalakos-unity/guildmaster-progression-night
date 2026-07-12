@@ -74,6 +74,21 @@ vertical slice          is it fun?         complete v1 loop        depth & meta
 
 **Then playtest the complete week/season loop** before opening MB.
 
+### 🚨 MC — The Tier-2 content gap (found 2026-07-12; **untracked until now**)
+
+| # | Milestone | Definition of done | Size | Depends |
+|---|---|---|---|---|
+| **MC-001** | **Author Tier 2** — the second raid | A second raid (~6–8 encounters) seeded for **Season 2 / Tier 2**: phases, `encounter_event` placements, loot table, and **a contract row per boss** in `encounter_contract.csv` inside the Tier-2 gear band. `season.csv` then expresses **two** seasons of the `crownfall` expansion. | **L** | M5 |
+
+**Why this is here.** v1's content bar is **2 tiers / ~12 bosses** (`content-and-dod` §Gate 2), and that doc itself says *"where the real authoring time goes: the ~12 bosses."* **We have 1 tier and 4 bosses.** No milestone in M0–M11 ever authored Tier 2 — M1 was explicitly a *starter kit* (one raid, 3–4 encounters), and every milestone after it builds systems, not content.
+
+This is now the **single largest untracked v1 scope item**, and it is a hard blocker on two things:
+
+- **MI-011** cannot pass its own acceptance (*"`season.csv` expresses two seasons"*) while only one tier of content exists. A season row pointing at a raid that does not exist would be worse than the gap.
+- **Gate 2** (*"play a full season → get graded → progress into Season 2 at a raised bar"*) is not reachable without a Tier 2 to progress *into*.
+
+**Do not fold this into M9.** Grading and season transition are *systems*; authoring 6–8 bespoke bosses is *content*, and the two have very different costs and risks. Sizing it honestly is the point of naming it.
+
 ## MB — Breadth backlog · *only after the Phase B-lite loop plays well*
 
 | # | Ticket | Why deferred |
@@ -96,7 +111,7 @@ vertical slice          is it fun?         complete v1 loop        depth & meta
 ---
 
 ## Engineering notes (your wheelhouse)
-- **Make the sim core a pure, seeded function** `(roster, encounter, seed) → outcome`. Then it's unit-testable, and you can run a **batch balance harness** (N pulls → assert win-rate ≈ the ~60–80% target, catch tuning regressions). Same discipline as data tests, but for game balance. Build the harness alongside M3 — it's the cheapest insurance against a broken feel later.
+- **Make the sim core a pure, seeded function** `(roster, encounter, seed) → outcome`. Then it's unit-testable, and you can run a **batch balance harness** (N pulls → assert each boss against **its own contract row**, catch tuning regressions). Same discipline as data tests, but for game balance. Build the harness alongside M3 — it's the cheapest insurance against a broken feel later. *(The original "~60–80% target" here was wrong on two counts: that is a farm feel, not progression, and one global band cannot catch a broken tier — see ADR-0024/0030.)*
 - **Content as data** — seed files (YAML/JSON) versioned in-repo, loaded via migrations. New classes/bosses/events = new rows, engine untouched. (Your dbt-seed instinct applies directly.)
 - **Persistence** — SQLite for the desktop app; the schema is already lakehouse-shaped, so migrations handle evolution cleanly.
 - **Observability is already designed in** — `PULL_EVENT`, `TREASURY_LEDGER`, `WEEK_ACTION` are audit trails. Surface a "why did this happen" debug view early; it doubles as your dev tooling.

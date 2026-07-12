@@ -107,7 +107,7 @@ func _run_sweep(
 				_cell(db, boss, prepared, mult, pulls, csv_lines, int(encounter["boss_order"]))
 			)
 
-	_print_sweep(matrix)
+	_print_sweep(matrix, contracts)
 	if args.has("csv"):
 		_write_csv(str(args["csv"]), csv_lines)
 	if args.has("assert_contracts"):
@@ -538,19 +538,33 @@ func _contracts(db: Variant) -> Dictionary:
 # --- reporting -----------------------------------------------------------------
 
 
-func _print_sweep(matrix: Dictionary) -> void:
+## The summary reports each boss at the gear IT IS FOR, not at a fixed x1.00.
+## Reading identity off the fresh-guild column is how the eye gets lied to: the
+## Slagbeast is contracted at x1.28 and dies there to `tank_survival`, but at x1.00
+## — gear it was never meant to be fought at — it reads `dps_enrage`, which looks
+## like a mistuned boss and is not. Judge a fight where the fight lives.
+func _print_sweep(matrix: Dictionary, contracts: Dictionary) -> void:
 	var header := "%-18s" % "BOSS"
 	for mult in GEAR_SWEEP:
 		header += " %7s" % ("x%.2f" % mult)
-	print(header + "   top wipe reason (at x1.00)")
+	print(header + "   AT ITS OWN GEAR: win / dominant failure")
 	for boss in matrix:
 		var line := "%-18s" % boss
-		var at_par := "-"
+		var expected := float(contracts[boss]["expected_gear"]) if contracts.has(boss) else 1.0
+		var at_gear := {}
 		for cell: Dictionary in matrix[boss]:
 			line += " %6.0f%%" % (float(cell["win_rate"]) * 100.0)
-			if is_equal_approx(float(cell["mult"]), 1.0):
-				at_par = str(cell["top_reason"])
-		print(line + "   " + at_par)
+			if is_equal_approx(float(cell["mult"]), expected):
+				at_gear = cell
+		if at_gear.is_empty():
+			print(line + "   (no contract row)")
+			continue
+		print(
+			(
+				"%s   x%.2f: %.0f%% / %s"
+				% [line, expected, float(at_gear["win_rate"]) * 100.0, at_gear["top_reason"]]
+			)
+		)
 
 
 func _at(cells: Array, mult: float) -> Dictionary:

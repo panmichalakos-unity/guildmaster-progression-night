@@ -124,4 +124,4 @@ The **same pipeline** runs at every involvement level:
 
 ---
 
-*v0.1 — resolution systems locked; constants symbolic, to be tuned against the ~60–80% matched-content win target. IP-original naming throughout.*
+*v0.1 — resolution systems locked. **Constants are no longer symbolic**: every boss is tuned against its own contract row in `data/seeds/encounter_contract.csv`, asserted in CI (ADR-0024, ADR-0030). Matched progression is **22–35% win/pull** (a kill in 3–8 pulls); the old "~60–80%" target described a **farm** feel and is superseded. IP-original naming throughout.*

@@ -37,7 +37,7 @@ The **calendar is a first-class object** — events scheduled on days. The old "
 
   A short season + hard bosses = you may *not* clear before the reset. That "did we make it in time?" pressure is the old-school feel, and it makes each expansion play differently.
 - **Expansion = a container of seasons**, ending with the **meta reset** (gear/balance). Carried by `Expansion.season_length_weeks` + `difficulty_band`.
-- **v1 = a single expansion** (1–3 tiers — a content-volume call).
+- 🔒 **v1 = a single expansion of EXACTLY TWO seasons — i.e. two tiers.** One season *is* one tier (see the locked banner above), so the Gate-2 bar — *"play a full 14-week season across 2 tiers"* — means **two seasons**, not two tiers inside one season. An earlier line here read *"1–3 tiers — a content-volume call"*, which contradicted the locked Season = Tier model; it is **removed**, and the count is no longer an open question.
 
 ## Save / campaign model
 - **One save file = one campaign** — the SQLite DB *is* the save. No `campaign_id` stamped on every table.

@@ -201,10 +201,18 @@ Across five different guild seeds: **1–4 kills each. No seed produces zero.**
 
 1. **Krogg is killable at x1.00.** If a fresh guild cannot kill the entry boss, the tier is a deadlock and the game has no first session. This is the single most important line in this document.
 2. **Every boss lives inside x1.00 → x1.64.** Content requiring more is unreachable.
-3. **Each boss's dominant failure matches its authored identity** (naming bible). A Slagbeast that dies to `tank_survival` is mistuned, not merely "hard".
-4. **The named intervention actually works.** If assigning a better interrupter doesn't measurably improve Vell, the prep control is decorative — fix it or cut it (MI-009's prep-leverage probes exist to catch this).
-5. Retune **seed rows**, never engine code. Content as data.
+3. **Each boss's dominant failure matches the `dominant_failure` in its contract row** — the machine-readable one in `data/seeds/encounter_contract.csv`, which the harness asserts *at the boss's own expected gear*. A boss that dies to something other than its contract is not the fight it says it is.
+4. **Each boss answers to its own signature lever** (`signature_lever`, ≥ `signature_min_delta`). If bringing healers doesn't measurably improve the healing wall, the prep control is decorative — fix it or cut it. **This is what boss identity actually means**, and MI-009's prep-leverage probes assert it.
+5. **A lever is allowed to COST you on a fight it is not for.** Stacking healers into a DPS race *should* hurt (−13.5pp on Cinderlords); that opportunity cost is what makes comp a decision rather than a checklist. "More healers is always better" is **not** the rule.
+6. Retune **seed rows**, never engine code. Content as data.
+
+> ### ⚠️ Superseded invariant — do not act on it
+> An earlier version of this list said: *"A Slagbeast that dies to `tank_survival` is mistuned."* **That is wrong and has been removed.** Slagbeast's contracted dominant failure **is** `tank_survival`, because that is what a healing wall actually does: it runs the healers dry until the tank drops. It is not Krogg's readiness gate in disguise — the diagnosis (ADR-0028) separates them by *contributing factor* (*"the healing lane fell short"* vs *"not crit-immune"*) and by *recommendation* (*"put more healing on the tank"* vs *"field a crit-immune tank"*).
+>
+> Boss identity lives in the **signature lever**, not in the wipe-reason string. An agent "fixing" Slagbeast to stop it dying to `tank_survival` would be breaking a boss that works.
 
 ## 4. How this is enforced
 
-**MI-009** extends the balance harness to assert each boss against *its own* contract — progression win-rate band, farm-state band, and dominant-failure identity — instead of one global band on Boss 1. The gear sweep is clamped to the realistic band. A boss that passes on gear the player can't reach is a **failing** boss.
+**MI-009** asserts every boss against *its own* contract row — progression win-rate band, farm band, monotonicity in gear, and dominant failure **at the gear the boss is for** — instead of one global band on Boss 1. The gear sweep is clamped to the reachable band, `seed_check` fails a boss with **no** contract row, and CI gates on both `--assert-contracts` and `--probes`. A boss that passes only on gear the player cannot reach is a **failing** boss.
+
+> **Terminology debt (not a blocker).** `farm_win_min` currently sits at 48% (Slagbeast) and 35% (Cinderlords) — which is *late progression*, not what an MMO player means by **farm** (a reliable repeat clear). These are pure-resolution numbers measured **before** learning, Marks, form, consumable scarcity and better planning enter the loop in Phase B. Revisit the thresholds *and the word* once those systems exist, and consider splitting the concept into `expected_progression` / `prepared` / `mastery` / `farm`, plus distinguishing **per-pull** win rate from **per-night clear** probability.
