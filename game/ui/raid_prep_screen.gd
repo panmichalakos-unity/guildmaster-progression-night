@@ -110,6 +110,14 @@ func _refresh() -> void:
 			ThemeBuilder.GOOD if str(warning["severity"]) == "ok" else ThemeBuilder.ACCENT
 		)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		# MI-008 — progressive disclosure. The warning already says the consequence
+		# and the fix in plain language; the tooltip is the DEPTH a veteran (or a
+		# curious newcomer) can reach for. It is never required to act.
+		var term := str(warning.get("term", ""))
+		if not term.is_empty() and Glossary.has_term(term):
+			var entry := Glossary.entry(term)
+			label.tooltip_text = "%s — %s\n\n%s" % [entry["term"], entry["plain"], entry["detail"]]
+			label.mouse_filter = Control.MOUSE_FILTER_STOP
 		_warnings_box.add_child(label)
 
 	_clear(_assign_box)

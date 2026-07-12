@@ -72,7 +72,11 @@ static func _headline(cause: String, input: Dictionary, state: Dictionary) -> St
 	match cause:
 		"tank_survival":
 			if not main_tank.is_empty() and int(main_tank.get("uncrittable", 0)) == 0:
-				return "The main tank was not crit-immune, so the boss's damage was never survivable."
+				return (
+					"Your main tank could be hit by a critical strike, so the boss's damage was"
+					+ " never survivable — no amount of healing would have saved him"
+					+ " (not uncrittable)."
+				)
 			return "The boss out-damaged what the tank and the healing on them could absorb."
 		"raid_collapse":
 			return (
@@ -80,7 +84,10 @@ static func _headline(cause: String, input: Dictionary, state: Dictionary) -> St
 				% state["deaths"].size()
 			)
 		"dps_enrage":
-			return "The boss enraged with health to spare: the raid's damage was short."
+			return (
+				"The boss outlasted you: its damage became unsurvivable while it still had"
+				+ " health left. Your raid simply did not hit hard enough (enrage)."
+			)
 		_:
 			return "The raid could not meet the fight's demands."
 
@@ -122,8 +129,8 @@ static func _recommendation(
 	# the readiness gate dwarfs every other lever — say so before anything else
 	if cause == "tank_survival" and tank_uncapped:
 		return (
-			"Field a crit-immune main tank. Check the bench: a properly capped tank is the"
-			+ " right call even when their gear score is lower."
+			"Field a main tank who cannot be critically hit. Check the bench: that tank is the"
+			+ " right call even when their gear score is lower (uncrittable)."
 		)
 	if int(state["assigned_failures"]) > 0:
 		return (

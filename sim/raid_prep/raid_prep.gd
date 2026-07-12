@@ -12,11 +12,41 @@ const LINEUP_SIZE := 20
 ## A 20-lineup wants at least this many of each; below = a warning.
 const ROLE_MINIMA := {"tank": 2, "healer": 5}
 const DPS_MIN := 12
-## Key utilities and the warning shown when the LINEUP brings none.
+
+## MI-008 — every warning states the CONSEQUENCE, then the ACTION, then the MMO
+## term in parentheses. A player who has never raided must be able to act on these
+## without a glossary; a veteran must still see the word they expect. The `term`
+## is the glossary key the UI hangs a tooltip on (progressive disclosure).
+## See docs/guildmaster-terminology.md.
 const KEY_UTILITIES := {
-	"rekindle": "No battle-rez tonight (Rekindle) — a death is a lost body",
-	"countercast": "No interrupt (Countercast) — enemy casts go unchecked",
-	"stormsurge": "No haste burst (Stormsurge) — bring a Channeler",
+	"rekindle":
+	{
+		"text":
+		(
+			"Nobody can revive a fallen raider mid-fight — every death is permanent for the"
+			+ " rest of the pull, and each lost body costs the raid damage and healing."
+			+ " Field a Rekindle caster (battle-rez)."
+		),
+		"term": "battle-rez",
+	},
+	"countercast":
+	{
+		"text":
+		(
+			"Nobody can cut off the boss's spellcasting — its worst spells will land on the"
+			+ " raid unchecked. Field a Countercast caster (interrupt)."
+		),
+		"term": "interrupt",
+	},
+	"stormsurge":
+	{
+		"text":
+		(
+			"Nobody can push the raid's damage for a burst window — you lose your best shot"
+			+ " at beating the boss's time limit. Field a Channeler (Stormsurge, a haste burst)."
+		),
+		"term": "haste burst",
+	},
 }
 
 ## Combat log outcome/effect categories that count as "harmful" for range profiling.
@@ -163,19 +193,57 @@ static func _warnings(
 	var warnings: Array[Dictionary] = []
 
 	if lineup.size() != LINEUP_SIZE:
-		warnings.append(_warn("warn", "Lineup has %d of %d raiders" % [lineup.size(), LINEUP_SIZE]))
+		var short := LINEUP_SIZE - lineup.size()
+		if short > 0:
+			(
+				warnings
+				. append(
+					_warn(
+						"warn",
+						(
+							(
+								"You are taking %d raiders into a %d-raider fight — %d empty seat%s is"
+								+ " output you simply do not have. Field %d more."
+							)
+							% [
+								lineup.size(),
+								LINEUP_SIZE,
+								short,
+								"" if short == 1 else "s",
+								short,
+							]
+						)
+					)
+				)
+			)
+
 	for role_slug in ROLE_MINIMA:
 		var have := int(coverage.get(role_slug, 0))
 		var want := int(ROLE_MINIMA[role_slug])
 		if have < want:
-			warnings.append(_warn("warn", "Only %d %ss (%d recommended)" % [have, role_slug, want]))
+			warnings.append(_warn("warn", _role_shortfall(role_slug, have, want)))
+
 	var dps := int(coverage["melee"]) + int(coverage["ranged"])
 	if dps < DPS_MIN:
-		warnings.append(_warn("warn", "Only %d DPS (%d recommended)" % [dps, DPS_MIN]))
+		warnings.append(
+			_warn(
+				"warn",
+				(
+					(
+						"Only %d raiders are dealing damage — the boss will outlast you and its"
+						+ " damage will become unsurvivable before it dies. Field at least %d"
+						+ " (damage dealers, or DPS)."
+					)
+					% [dps, DPS_MIN]
+				),
+				"enrage"
+			)
+		)
 
 	for utility_slug: String in KEY_UTILITIES:
 		if not utilities.has(utility_slug):
-			warnings.append(_warn("warn", str(KEY_UTILITIES[utility_slug])))
+			var utility: Dictionary = KEY_UTILITIES[utility_slug]
+			warnings.append(_warn("warn", str(utility["text"]), str(utility["term"])))
 
 	# range balance: a melee-heavy lineup into a melee-punishing night (or v/v)
 	var melee := int(range_profile["lineup_melee"])
@@ -185,32 +253,95 @@ static func _warnings(
 		and melee > ranged
 	):
 		warnings.append(
-			_warn("warn", "%d melee into a melee-punishing night — consider more ranged" % melee)
+			_warn(
+				"warn",
+				(
+					(
+						"%d of your raiders fight from close range, and tonight's boss aims its"
+						+ " worst attacks exactly there — they will be caught by mechanics they"
+						+ " cannot avoid. Swap some for raiders who fight at a distance (melee"
+						+ " vs ranged)."
+					)
+					% melee
+				),
+				"melee"
+			)
 		)
 	elif (
 		int(range_profile["night_ranged_pressure"]) > int(range_profile["night_melee_pressure"])
 		and ranged > melee
 	):
 		warnings.append(
-			_warn("warn", "%d ranged into a ranged-punishing night — consider more melee" % ranged)
+			_warn(
+				"warn",
+				(
+					(
+						"%d of your raiders fight at a distance, and tonight's boss punishes the"
+						+ " back line — they will take damage they cannot avoid. Swap some for"
+						+ " close-range raiders (melee vs ranged)."
+					)
+					% ranged
+				),
+				"ranged"
+			)
 		)
 
-	# gear readiness: the main tank must be crit-immune (the gear gate)
+	# THE warning the first session hangs on (MI-003). It has to name the
+	# consequence, name the fix, and say the quiet part out loud: field the tank
+	# who looks WORSE on paper. See docs/guildmaster-terminology.md.
 	var main_tank := _highest_geared(lineup, "tank")
 	if not main_tank.is_empty() and int(main_tank["uncrittable"]) == 0:
 		warnings.append(
 			_warn(
-				"warn", "Main tank %s is not uncrittable — spike-death risk" % main_tank["handle"]
+				"warn",
+				(
+					(
+						"Your main tank %s can be hit by a critical strike — one unlucky spike will"
+						+ " kill him outright and end the pull, and no amount of healing prevents"
+						+ " it. Field a tank who cannot be critically hit, even if their gear score"
+						+ " is lower (uncrittable)."
+					)
+					% main_tank["handle"]
+				),
+				"uncrittable"
 			)
 		)
 
 	if warnings.is_empty():
-		warnings.append(_warn("ok", "Comp looks solid — lineup is raid-ready"))
+		warnings.append(
+			_warn("ok", "Lineup looks raid-ready — roles, utilities and range are all covered.")
+		)
 	return warnings
 
 
-static func _warn(severity: String, text: String) -> Dictionary:
-	return {"severity": severity, "text": text}
+## Role shortfalls in the language of what the role DOES, not what it is called.
+static func _role_shortfall(role_slug: String, have: int, want: int) -> String:
+	match role_slug:
+		"tank":
+			return (
+				(
+					"Only %d raider%s can hold the boss's attention — if one goes down there is"
+					+ " nobody to take over and the raid folds. Field at least %d tanks."
+				)
+				% [have, "" if have == 1 else "s", want]
+			)
+		"healer":
+			return (
+				(
+					"Only %d healers — they cannot keep up with the damage this fight puts out,"
+					+ " and raiders will start dying with nothing coming. Field at least %d."
+				)
+				% [have, want]
+			)
+		_:
+			return "Only %d %ss (%d recommended)." % [have, role_slug, want]
+
+
+## `term` is the glossary key (data/seeds/glossary.json) the UI hangs a tooltip
+## on. It is enrichment, never a requirement — the text must already be actionable
+## on its own (MI-008).
+static func _warn(severity: String, text: String, term: String = "") -> Dictionary:
+	return {"severity": severity, "text": text, "term": term}
 
 
 # --- assignments --------------------------------------------------------------

@@ -36,9 +36,12 @@ func test_prep_warns_before_the_player_pulls() -> void:
 		var prep := RaidPrep.build(
 			campaign["db"], int(campaign["event_id"]), PullInputLoader.auto_lineup(campaign["db"])
 		)
+		# match the STRUCTURED term, not the prose: MI-008 rewrote this warning into
+		# plain language, and a test that sniffs for the jargon would have blocked
+		# the very fix that makes the sentence readable.
 		var warned := false
 		for warning: Dictionary in prep["warnings"]:
-			if str(warning["text"]).contains("not uncrittable"):
+			if str(warning.get("term", "")) == "uncrittable":
 				warned = true
 		(
 			assert_bool(warned)

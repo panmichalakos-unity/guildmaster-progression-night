@@ -557,7 +557,7 @@ static func _emit_tank_overwhelmed(
 	)
 	var uncapped := int(main_tank.get("uncrittable", 0)) == 0
 	var line := (
-		"%s is not crit-immune — the boss crits through him and he drops."
+		"A critical strike lands on %s and there was never enough health to survive it."
 		if uncapped
 		else "%s is simply out-damaged — the healing cannot keep him up, and he drops."
 	)
@@ -658,29 +658,40 @@ static func _verdict(
 static func _contributing_factors(
 	by_kind: Dictionary, state: Dictionary, main_tank: Dictionary, death_fraction: float
 ) -> Array[String]:
+	# MI-008: these are read by the player, so they speak the player's language —
+	# "your healers could not keep up", not "the healing lane fell 5.6 short".
 	var factors: Array[String] = []
 	if not bool(by_kind["healing"]["passed"]):
 		factors.append(
 			(
-				"healing lane fell %.1f short — deaths came faster than heals"
+				(
+					"your healers could not keep up with the damage (%.1f short) — raiders died"
+					+ " faster than they could be healed"
+				)
 				% absf(float(by_kind["healing"]["margin"]))
 			)
 		)
 	if not bool(by_kind["mechanic"]["passed"]):
 		factors.append(
 			(
-				"raid awareness below the fight's demand (%.1f short) — avoidable damage piled up"
+				(
+					"the raid kept taking damage it should have avoided (%.1f short on awareness)"
+					+ " — every hit made the healers' job harder"
+				)
 				% absf(float(by_kind["mechanic"]["margin"]))
 			)
 		)
 	if not main_tank.is_empty() and int(main_tank.get("uncrittable", 0)) == 0:
 		factors.append(
-			"%s is not crit-immune — one spike can end a pull" % main_tank.get("handle", "the tank")
+			(
+				"%s can be hit by a critical strike — one spike ends the pull (not uncrittable)"
+				% main_tank.get("handle", "the tank")
+			)
 		)
 	if int(state["assigned_failures"]) > 0:
 		factors.append(
 			(
-				"%d assigned duty/duties missed — unchecked casts hit the raid"
+				"%d assigned job(s) were dropped — the boss's spells landed on the raid unchecked"
 				% int(state["assigned_failures"])
 			)
 		)

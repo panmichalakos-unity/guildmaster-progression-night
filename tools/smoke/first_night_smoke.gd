@@ -60,7 +60,7 @@ func _init() -> void:
 	# 2. the prep screen warns BEFORE the player pulls
 	var warned := false
 	for warning: Dictionary in prep["warnings"]:
-		if str(warning["text"]).contains("not uncrittable"):
+		if str(warning.get("term", "")) == "uncrittable":
 			warned = true
 			print("  prep warning: %s" % warning["text"])
 	if not warned:

@@ -1,0 +1,75 @@
+{
+	"_comment": "MI-008 — the dual-language glossary. Every MMO term the UI is allowed to say is defined HERE, once. The rule (docs/guildmaster-terminology.md): plain-language consequence FIRST, the term SECOND, in parentheses. Terms are never removed — MMO authenticity is the point — but they are never load-bearing either: a management-sim player who ignores every parenthesis must still be able to act. `plain` is the phrase that replaces the term in body copy; `detail` is what a tooltip or the glossary screen shows.",
+	"terms": {
+		"uncrittable": {
+			"term": "Uncrittable",
+			"plain": "cannot be critically hit",
+			"detail": "A critical hit lands for roughly double damage. A tank who can be crit will eventually take two huge hits back-to-back and die before any healer can react — no amount of healing prevents it. Enough defensive gear makes a tank immune to crits entirely, and that threshold is the single most important thing about a main tank. A lower-geared tank who is crit-immune is a BETTER main tank than a higher-geared one who is not."
+		},
+		"battle-rez": {
+			"term": "Battle-rez",
+			"plain": "revive a fallen raider mid-fight",
+			"detail": "Short for 'battle resurrection'. Most revival magic only works out of combat; a battle-rez brings someone back DURING the fight. Without one, every death is permanent for the rest of the pull, and each lost body means less damage and less healing for everyone still standing."
+		},
+		"interrupt": {
+			"term": "Interrupt",
+			"plain": "cut off the boss's spellcasting",
+			"detail": "Bosses cast spells with a wind-up. An interrupt cancels the cast before it lands. Miss the window and the spell resolves — usually as heavy damage to the whole raid. Interrupts are assigned to specific raiders, and a raider with poor Execution will drop them."
+		},
+		"haste burst": {
+			"term": "Haste burst",
+			"plain": "push the raid's damage far above normal for a short window",
+			"detail": "A cooldown that briefly makes the whole raid attack faster. It is how a raid beats a damage race it would otherwise lose — saved for the moment it matters, usually the last stretch before the boss enrages."
+		},
+		"enrage": {
+			"term": "Enrage",
+			"plain": "the boss's damage becomes unsurvivable after a time limit",
+			"detail": "A hard timer. If the boss is still alive when it expires, it starts hitting hard enough to kill the raid outright. An enrage wipe means one thing: not enough damage. Nothing else."
+		},
+		"dps": {
+			"term": "DPS",
+			"plain": "damage dealers",
+			"detail": "'Damage per second' — used both for the raiders whose job is damage, and for the amount of damage the raid puts out. A raid that cannot deal enough damage loses to the enrage timer no matter how well it plays."
+		},
+		"melee": {
+			"term": "Melee",
+			"plain": "close-range attackers",
+			"detail": "Raiders who must stand next to the boss. That puts them in the path of anything the fight aims at close range — some bosses punish a big melee group very hard."
+		},
+		"ranged": {
+			"term": "Ranged",
+			"plain": "attackers who fight from a distance",
+			"detail": "Raiders who attack from range. Safe from close-range attacks, but exposed to whatever a fight throws at the back line."
+		},
+		"soak": {
+			"term": "Soak",
+			"plain": "a raider is assigned to deliberately absorb an attack",
+			"detail": "Some attacks must be caught by somebody, or they hit the whole raid. A soak assignment means one raider takes the hit on purpose so nobody else has to."
+		},
+		"dispel": {
+			"term": "Dispel",
+			"plain": "remove a harmful effect from a raider",
+			"detail": "Some boss abilities leave a lingering effect that gets worse over time. A dispel strips it off. Without one, the effect simply runs its course."
+		},
+		"wipe": {
+			"term": "Wipe",
+			"plain": "the whole raid dies and the attempt ends",
+			"detail": "A failed attempt. The raid resets and pulls again. Wipes are normal on new content — progress is measured in how far you got, not whether you died."
+		},
+		"pull": {
+			"term": "Pull",
+			"plain": "one attempt at a boss",
+			"detail": "Starting the fight. A boss is usually killed after several attempts, not on the first one — a kill in three to eight pulls is healthy progression."
+		},
+		"comp": {
+			"term": "Comp",
+			"plain": "the mix of roles in your lineup",
+			"detail": "Short for 'composition'. How many tanks, healers, close-range and ranged attackers you field, and which utilities they bring between them."
+		},
+		"gear score": {
+			"term": "Gear score",
+			"plain": "a single number summarising how well-equipped a raider is",
+			"detail": "The sum of the item levels of everything a raider has equipped. It is a useful shorthand — but it is NOT the whole story. A tank's crit immunity matters more than their gear score, which is why the best-geared tank is not always the right main tank."
+		}
+	}
+}
