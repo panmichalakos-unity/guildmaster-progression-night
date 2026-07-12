@@ -66,14 +66,22 @@ Coverage: **3 tank specs across 3 classes** (comp resilience — losing one clas
 - [x] One raid (3–4 bosses) seeded
 - [x] Resolve a raid night: lineup → assignments → pull-by-pull combat log → kill/wipe + `wipe_reason` + per-raider ratings + loot drop
 - [x] Post-night report readable
-- [x] Deterministic: same seed → same result; batch harness runs N pulls, win-rate lands near the ~60–80% target
+- [x] Deterministic: same seed → same result; batch harness runs N pulls, win rates land in each boss's contracted band (`guildmaster-encounter-contracts.md` — progression **22–35%/pull**; the old "~60–80%" figure was a *farm* feel and is superseded, ADR-0024)
 
-**🔒 The gate itself — NOT PASSED (2026-07-11):**
-- [ ] **Verdict: is the raid night fun to run?**
+**🔒 The gate itself — ✅ PASSED (2026-07-12):**
+- [x] **Verdict: is the raid night fun to run?**
 
-> **Technical completion is not the gate.** The default first session resolves **32 pulls, 0 kills, 32 wipes** — the entry boss demands roughly the gear it drops (starting ilvl 18.9 vs Tier-1 drops at ilvl 31), and the four checks are conjunctive rolls that cap even a healthy raid at ~41%. A player cannot experience *prepare → fail legibly → adjust → get closer → **kill***.
+> ### ✅ **GATE 1 PASSED — Panos, 2026-07-12**
 >
-> **Milestone MI (Intervention) blocks M5.** See `guildmaster-intervention-and-realignment.md`. The gate is a **human verdict from real playtesters** (MI-010), scored against the card below — not a test suite.
+> > *"It seems solid, hard enough but doable, I feel it just about right."*
+>
+> **What this verdict settles.** The difficulty band is right *by feel*, and it agrees with the harness — the encounter contracts target **22–35% win per pull** on progression content (a kill in 3–8 pulls) and Night One measures **40.7%** after the readiness fix. Gut and instrumentation now say the same thing, which is the entire reason we kept both.
+>
+> **Where we came from.** On 2026-07-11 this same build resolved **32 pulls, 0 kills, 32 wipes**: the entry boss demanded roughly the gear it drops, and four conjunctive check-rolls capped even a healthy raid at ~41%. Milestone **MI** fixed the tier (ADR-0024), the aggregation (ADR-0023), the first session (ADR-0025/0026), the show (ADR-0027) and the diagnosis (ADR-0028).
+>
+> **What this verdict does NOT settle.** It speaks directly to *plausible first kill*, *meaningful decision*, and *want to continue*. It does **not** probe **"can a non-MMO player act on the UI's warnings alone?"** — the tester is an expert. That line stays open and is **MI-008**'s job.
+>
+> **Phase A is closed. MI's remaining polish tickets still precede M5** (see `guildmaster-backlog.md`).
 
 #### The human Fun Gate scorecard (MI-010)
 

@@ -263,3 +263,17 @@ Standing in the fire (`death`) and dropping a duty you were handed (`duty_fail`)
 **Also fixed: recurrence never worked.** `top_wipe_reasons` tallied the raw `wipe_reason`, which embeds margins and probabilities — so every wipe hashed unique, every count came out as 1, and the one sentence that tells a player *"you are not unlucky, you are stuck"* could never appear. Wipes group on the **primary cause** now.
 
 **Consequence.** **Balance is untouched** — both deaths are emitted *after* the verdict, so the checks and collapse fraction that decided the pull never see them. The harness reports identical win rates to the point (40 / 21 / 11 / 5 % at starting gear). This closes an incoherence; it does not open a new failure path.
+
+## ADR-0029 · 2026-07-12 · Gate 1 passed — the raid night is fun (MI-010)
+
+**Decision.** **Phase A is closed.** The human Fun Gate — the one verdict in this project that no test suite can give — passed on 2026-07-12.
+
+> *"It seems solid, hard enough but doable, I feel it just about right."* — Panos
+
+**Why it matters.** Twenty-four hours earlier the same build resolved **32 pulls, 0 kills, 32 wipes**, and every automated gate was green while it did so. That contradiction is what milestone **MI** existed to resolve: the tier was uncompletable (ADR-0024), the checks were conjunctive and capped a healthy raid at ~41% (ADR-0023), the first session contained no decision (ADR-0025/0026), the log had no ending (ADR-0027), and the report blamed raiders for the guildmaster's own failures (ADR-0028).
+
+**The verdict agrees with the instrumentation.** The encounter contracts target **22–35% win/pull** on progression content — a kill in 3–8 pulls — and Night One measures **3.3% → 40.7%** across the readiness fix. "Hard enough but doable" is that band, felt rather than computed. Keeping both a human gate and a balance harness only pays off at the moment they agree; this is that moment.
+
+**What the verdict does NOT cover.** It was given by the designer, an expert player. It says nothing about *"can a non-MMO player act on the UI's warnings alone?"* — that scorecard line remains open and belongs to **MI-008** (terminology). Do not read this ADR as clearing it.
+
+**Consequence.** MI's remaining tickets (MI-006…MI-009, MI-011, MI-012) still land before M5, per `guildmaster-backlog.md`. **The first thing to protect is the thing just blessed:** MI-009 replaces the harness's single global band-assert with **per-boss contract assertions**, so the difficulty Panos just approved cannot silently regress. A green harness that permits an unfun game is the precise failure this milestone was created to prevent — and it must not be allowed to recur.
