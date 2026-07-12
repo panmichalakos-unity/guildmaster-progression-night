@@ -49,6 +49,7 @@ Doc map:
 | `guildmaster-presentation.md` | **the raid-night show** — notability hierarchy, phase beats, the closing beat, "closest yet", pacing |
 | `guildmaster-diagnostics.md` | **why did we wipe** — primary cause vs contributing factors vs key moment; the anti-scapegoat rule |
 | `guildmaster-terminology.md` | **dual-language UI copy** — consequence first, action always, MMO term in parentheses; the glossary |
+| `guildmaster-rating.md` | **the 1-10 performance rating** — what it measures, the event deltas, no double-counting; loot evidence for M6 |
 | `guildmaster-raid-prep.md` | lineup, comp warnings, assignments, benching, consumable plan |
 | `guildmaster-gear.md` | 7-slot gear model, `gear_score`, caps, spec-fit, Marks |
 | `guildmaster-loot.md` | Council/DKP/roll, claims panel, fairness consequences |

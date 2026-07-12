@@ -94,7 +94,7 @@ func _build() -> void:
 		(
 			root
 			. add_child(
-				_dim(
+				_body(
 					(
 						"%-14s %-7s  %.1f  (%d death%s)"
 						% [
@@ -108,6 +108,12 @@ func _build() -> void:
 				)
 			)
 		)
+		# MI-006 — WHY. A bare number beside a death count is how a guildmaster ends
+		# up benching the wrong raider; ratings are loot EVIDENCE (M6 Council), and
+		# evidence you cannot interrogate is just a vibe.
+		var why := str(row.get("why", ""))
+		if not why.is_empty():
+			root.add_child(_dim("        %s" % why))
 
 	root.add_child(_title("WHAT STOPPED YOU"))
 	var wipes: Array = _report.get("top_wipe_reasons", [])

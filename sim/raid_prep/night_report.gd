@@ -74,12 +74,24 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 					"rating_sum": 0.0,
 					"pulls": 0,
 					"deaths": 0,
+					# MI-006: what the raider actually DID across the night, tallied so
+					# the report can explain the average instead of just printing it.
+					"factors": {},
+					"output_sum": 0.0,
 				}
 			var row: Dictionary = rating_totals[avatar_id]
 			row["rating_sum"] = float(row["rating_sum"]) + float(participant["performance_rating"])
 			row["pulls"] = int(row["pulls"]) + 1
 			if bool(participant.get("died", false)):
 				row["deaths"] = int(row["deaths"]) + 1
+			var factors: Dictionary = row["factors"]
+			for factor: Dictionary in participant.get("rating_factors", []):
+				var code := str(factor["code"])
+				if code == "output":
+					# the per-pull VERDICT does not sum, but the ratio behind it does
+					row["output_sum"] = float(row["output_sum"]) + float(factor["value"])
+					continue
+				factors[code] = int(factors.get(code, 0)) + 1
 
 	var handles := _handles(db, rating_totals.keys())
 	var ratings: Array[Dictionary] = []
@@ -96,6 +108,9 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 					"avg_rating": snappedf(float(row["rating_sum"]) / float(pulls_n), 0.1),
 					"pulls": pulls_n,
 					"deaths": int(row["deaths"]),
+					# MI-006 — the one line that makes the number arguable instead of
+					# arbitrary. Loot Council (M6) reads ratings as EVIDENCE.
+					"why": _why(row["factors"], float(row["output_sum"]) / float(pulls_n)),
 				}
 			)
 		)
@@ -138,6 +153,27 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 		"learning": progress,
 		"summary_line": _summary_line(bosses, kills, wipes),
 	}
+
+
+## What this raider's night actually consisted of, in the player's language — the
+## night-level counterpart of RatingEngine's per-pull breakdown. Empty when they
+## simply did their job: an unremarkable night needs no explanation, and padding it
+## with one would drown the nights that DO.
+static func _why(factors: Dictionary, mean_output_ratio: float) -> String:
+	# Competence first, then what it cost, then the deaths that were never theirs.
+	# A summary that opens with a raider's failures is an indictment, not an
+	# explanation — before this, the MVP's line read "3 avoidable death(s)" and
+	# nothing else, which says the opposite of what the number says.
+	var parts: Array[String] = [RatingEngine.output_label(mean_output_ratio)]
+	for code: String in RatingEngine.NIGHT_ORDER:
+		if not factors.has(code):
+			continue
+		var label := str(RatingEngine.night_label(code))
+		if label.is_empty():
+			continue
+		parts.append(label % int(factors[code]) if label.contains("%d") else label)
+	var text := "; ".join(parts)
+	return text.substr(0, 1).to_upper() + text.substr(1) + "."
 
 
 ## "Tank survival failed 4 of your 5 pulls here." The single most useful sentence
