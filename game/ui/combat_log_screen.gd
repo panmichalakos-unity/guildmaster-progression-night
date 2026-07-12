@@ -328,7 +328,15 @@ func _add_event(event: Dictionary) -> void:
 	var notability := PullContracts.notability_for(outcome)
 	var text := str(event["log_line"])
 
-	if outcome in [Timeline.OUTCOME_DEATH, Timeline.OUTCOME_TANK_DEATH]:
+	if (
+		outcome
+		in [
+			Timeline.OUTCOME_DEATH,
+			Timeline.OUTCOME_CASCADE_DEATH,
+			Timeline.OUTCOME_TANK_DEATH,
+			Timeline.OUTCOME_TANK_OVERWHELMED,
+		]
+	):
 		_alive = maxi(0, _alive - 1)
 		_refresh_alive()
 	elif outcome == Timeline.OUTCOME_WIPE_CALL:
@@ -405,15 +413,33 @@ func _render_outcome(step: Dictionary) -> void:
 			lines
 		)
 	else:
+		# MI-005: the card speaks the DIAGNOSIS, never `wipe_reason` — that string
+		# is internal shorthand full of margins and probabilities, and it names the
+		# main tank in a way that reads like an accusation.
+		var diagnosis: Dictionary = pull.get("diagnosis", {})
 		lines.append(
 			(
 				"[b]Boss to %d%%[/b]  ·  %s  ·  %s"
 				% [progress, _closeness(progress, previous_best), _clock(int(pull["duration_sec"]))]
 			)
 		)
-		for factor: String in pull.get("contributing_factors", []):
+		if diagnosis.is_empty():
+			_set_card("WIPE — %s" % str(pull["wipe_reason"]), ThemeBuilder.DANGER, lines)
+			return
+
+		lines.append(str(diagnosis["headline"]))
+		for factor: String in diagnosis.get("contributing_factors", []):
 			lines.append("· %s" % factor)
-		_set_card("WIPE — %s" % str(pull["wipe_reason"]), ThemeBuilder.DANGER, lines)
+		var key_moment: Dictionary = diagnosis.get("key_moment", {})
+		if not key_moment.is_empty():
+			lines.append("[b]Key moment[/b] — %s" % str(key_moment["log_line"]))
+		lines.append(
+			(
+				"[color=#%s]→ %s[/color]"
+				% [ThemeBuilder.ACCENT.to_html(false), str(diagnosis["recommendation"])]
+			)
+		)
+		_set_card("WIPE — %s" % str(diagnosis["primary_cause_label"]), ThemeBuilder.DANGER, lines)
 
 	_best_pct[slug] = maxi(previous_best, progress)
 

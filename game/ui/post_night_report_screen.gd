@@ -37,13 +37,13 @@ func _build() -> void:
 				"s" if int(boss["attempts"]) != 1 else ""
 			]
 		)
-		if not bool(boss["killed"]) and not str(boss["last_wipe_reason"]).is_empty():
-			line += "\n  last wipe: %s" % boss["last_wipe_reason"]
 		var label := _body(line)
 		label.add_theme_color_override(
 			"font_color", ThemeBuilder.GOOD if bool(boss["killed"]) else ThemeBuilder.DANGER
 		)
 		root.add_child(label)
+		if not bool(boss["killed"]):
+			_add_diagnosis(root, boss)
 
 	root.add_child(_title("LEARNING ARC"))
 	var learning: Array = _report.get("learning", [])
@@ -109,13 +109,13 @@ func _build() -> void:
 			)
 		)
 
-	root.add_child(_title("WIPE REASONS"))
+	root.add_child(_title("WHAT STOPPED YOU"))
 	var wipes: Array = _report.get("top_wipe_reasons", [])
 	if wipes.is_empty():
 		root.add_child(_dim("No wipes tonight."))
 	else:
 		for row: Dictionary in wipes:
-			root.add_child(_dim("%dx  %s" % [int(row["count"]), row["reason"]]))
+			root.add_child(_dim("%dx  %s" % [int(row["count"]), row["label"]]))
 
 	root.add_child(_title("LOOT (display stub — claims land in M6)"))
 	var loot: Array = _report.get("loot", [])
@@ -144,6 +144,41 @@ func _build() -> void:
 					)
 				)
 			)
+
+
+## MI-005 — the diagnostic hierarchy, in the order a guildmaster should read it.
+## Note what is NOT here: a culprit. The primary cause is a CHECK, the factors are
+## COUPLED CONDITIONS, and a person is named only under "key moment" and only when
+## they actually authored the event. A wipe with no key moment is a systems
+## problem, and the page says so instead of reaching for somebody to bench.
+func _add_diagnosis(root: Node, boss: Dictionary) -> void:
+	var diagnosis: Dictionary = boss.get("last_diagnosis", {})
+	if diagnosis.is_empty():
+		if not str(boss.get("last_wipe_reason", "")).is_empty():
+			root.add_child(_dim("    last wipe: %s" % boss["last_wipe_reason"]))
+		return
+
+	var cause := _body("    Primary cause: %s" % str(diagnosis["primary_cause_label"]))
+	cause.add_theme_color_override("font_color", ThemeBuilder.CRITICAL)
+	root.add_child(cause)
+	root.add_child(_dim("    %s" % str(diagnosis["headline"])))
+
+	for factor: String in diagnosis.get("contributing_factors", []):
+		root.add_child(_dim("      · %s" % factor))
+
+	var key_moment: Dictionary = diagnosis.get("key_moment", {})
+	if not key_moment.is_empty():
+		root.add_child(_dim("      Key moment — %s" % str(key_moment["log_line"])))
+
+	var recommendation := _body("    → %s" % str(diagnosis["recommendation"]))
+	recommendation.add_theme_color_override("font_color", ThemeBuilder.ACCENT)
+	root.add_child(recommendation)
+
+	var recurrence := str(boss.get("recurrence", ""))
+	if not recurrence.is_empty():
+		var repeat := _body("    %s" % recurrence)
+		repeat.add_theme_color_override("font_color", ThemeBuilder.CRITICAL)
+		root.add_child(repeat)
 
 
 func _title(text: String) -> Label:

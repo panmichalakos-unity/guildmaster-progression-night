@@ -120,11 +120,13 @@ Default is **Live at 1x** — a first-time player should watch their first pull.
 
 ---
 
-## 7. Open issue this ticket surfaced (not fixed here)
+## 7. ✅ The open issue this ticket surfaced — **closed by MI-005**
 
-**A `tank_survival` wipe marks nobody as dead.** The tank check fails as a *check*; no death event fires, so `participants[].died` is `false` for everyone and the post-night report will happily show **0 deaths on a wipe caused by the tank dying.** The combat log now papers over this honestly (the closing beat says "cannot hold it", and the raid counter drops to 0 on the wipe, because a wipe *is* a wipe) — but the underlying incoherence is real and belongs to the diagnostics work.
+**A `tank_survival` wipe marked nobody as dead.** The tank check fails as a *check*; no death event fired, so `participants[].died` was `false` for everyone and the post-night report showed **0 deaths on a wipe caused by the tank dying.**
 
-**Owner: MI-005** (diagnostic hierarchy). Either the tank-gate failure must emit a real `tank_death` event, or the report must stop implying deaths it does not have.
+**Resolved in MI-005** (ADR-0028): the timeline now emits a `tank_overwhelmed` beat — the tank falls, so the log, the death list and the report finally agree. Crucially it is a **separate outcome from `tank_death` and carries no rating penalty**, because a tank who is out-damaged for want of the crit-immune cap authored nothing: the guildmaster fielded him. MI-005 found the same bug a second time in `cascade_death`. See **`guildmaster-diagnostics.md` §2**.
+
+The combat-log card now speaks the **structured diagnosis** rather than the raw `wipe_reason` — that string is internal shorthand full of margins and probabilities, and it named the main tank in a way that read like an accusation.
 
 ---
 

@@ -37,11 +37,14 @@ const CHECK_KINDS := ["dps", "healing", "tank", "mechanic", "assigned_duty"]
 ## THIS, so they cannot disagree about what mattered.
 const NOTABILITY := ["routine", "notable", "critical", "decisive"]
 
-## The pull turned here. A tank death IS the wipe — it is not one beat among many —
-## and `boss_down` / `wipe_call` are the fight's own closing beat (Timeline).
-const _DECISIVE_OUTCOMES := ["tank_death", "boss_down", "wipe_call"]
+## The pull turned here. A tank going down IS the wipe — it is not one beat among
+## many — and `boss_down` / `wipe_call` are the fight's own closing beat (Timeline).
+const _DECISIVE_OUTCOMES := ["tank_death", "tank_overwhelmed", "boss_down", "wipe_call"]
 ## Somebody died, a duty was dropped, or a life was stolen back. Real consequence.
-const _CRITICAL_OUTCOMES := ["death", "duty_fail", "save"]
+## `cascade_death` sits here too — losing a body to the healing running dry is just
+## as big a moment as standing in the fire; it simply is not the victim's FAULT.
+## Notability is about weight, not blame. Blame is Diagnosis's job.
+const _CRITICAL_OUTCOMES := ["death", "cascade_death", "duty_fail", "save"]
 ## Tension and payoff — the fight breathing. Worth reading, not worth panicking.
 const _NOTABLE_OUTCOMES := ["survived", "surge"]
 

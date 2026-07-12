@@ -28,6 +28,14 @@ static var _outcome_deltas := {
 	Timeline.OUTCOME_DUTY_OK: 0.5,
 	Timeline.OUTCOME_SURGE: 0.5,
 	Timeline.OUTCOME_SURVIVED: 0.5,
+	# MI-005 — DELIBERATELY ZERO, both of them. A tank who is out-damaged (almost
+	# always for want of the crit-immune cap) and a raider caught by the raid's
+	# healing running dry rolled nothing they controlled and authored nothing: the
+	# guildmaster fielded the lineup. Docking them would teach the player to bench
+	# the casualty instead of fixing the system — the exact scapegoat trap this
+	# ticket exists to close. They die in the log; they do not take the blame.
+	Timeline.OUTCOME_TANK_OVERWHELMED: 0.0,
+	Timeline.OUTCOME_CASCADE_DEATH: 0.0,
 }
 
 
@@ -74,10 +82,17 @@ static func rate(
 	return rows
 
 
+## What a combat-log outcome does to the raider it happened TO. Public so the
+## anti-scapegoat rules are assertable: a failure a raider did not author must
+## cost them exactly nothing, and a test says so (MI-005).
+static func delta_for(event_outcome: String) -> float:
+	return float(_outcome_deltas.get(event_outcome, 0.0))
+
+
 static func _event_deltas(events: Array) -> Dictionary:
 	var deltas := {}
 	for event: Dictionary in events:
-		var delta := float(_outcome_deltas.get(str(event.get("outcome", "")), 0.0))
+		var delta := delta_for(str(event.get("outcome", "")))
 		if delta == 0.0:
 			continue
 		var target := int(event.get("target_avatar_id", 0))

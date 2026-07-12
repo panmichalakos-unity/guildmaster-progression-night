@@ -48,6 +48,21 @@ const OUTCOME_SURVIVED := "survived"
 ## missing from the show entirely. The fight now says out loud how it ended.
 const OUTCOME_BOSS_DOWN := "boss_down"
 const OUTCOME_WIPE_CALL := "wipe_call"
+## MI-005 — the tank was OUT-DAMAGED, not out-played. The stage-3 tank check can
+## fail on the lane alone (usually the -25 uncrittable gate), with no death event
+## anywhere in the timeline: the log said "tank_survival" while the tank was still
+## standing and the report showed zero deaths. He falls now, so the log, the death
+## list and the report finally agree — but this is a SEPARATE outcome from
+## `tank_death` for one reason: it must never cost him rating. He did not author
+## it. The guildmaster fielded him. See docs/guildmaster-diagnostics.md.
+const OUTCOME_TANK_OVERWHELMED := "tank_overwhelmed"
+## MI-005 — a CASCADE death: the raid ran out of healing and this raider was the
+## one it caught. The resolution doc has always called this "death, not own fault"
+## — but the engine emitted it as a plain `death`, so the victim of the raid's
+## healing shortfall was docked the same rating as somebody who stood in the fire,
+## and the report could name him as the "key moment". Same scapegoat trap as the
+## tank, different casualty. It is its own outcome now, and it costs him nothing.
+const OUTCOME_CASCADE_DEATH := "cascade_death"
 
 const _ATTR_FIELD := {
 	"awareness": "awareness", "consistency": "consistency", "execution": "execution"
@@ -128,13 +143,19 @@ static func run(input: Dictionary, rng: RngStream) -> Dictionary:
 	var checks := PullChecks.resolve(input, final_lanes, rng.substream("checks"))
 
 	var verdict := _verdict(input, checks, state, final_lanes)
+	# The tank falls HERE, after the verdict, so the checks and the collapse
+	# fraction that decided this pull are untouched: nothing about balance moves.
+	# This closes the incoherence, it does not create a new failure path.
+	_emit_tank_overwhelmed(input, state, verdict, checks)
 	_emit_closing_beat(input, state, verdict)
+	var diagnosis := Diagnosis.build(input, checks, state, verdict)
 	return {
 		"events": state["events"],
 		"deaths": state["deaths"],
 		"outcome": verdict["outcome"],
 		"wipe_reason": verdict["wipe_reason"],
 		"contributing_factors": verdict["contributing_factors"],
+		"diagnosis": diagnosis,
 		"progress_pct": verdict["progress_pct"],
 		"checks": checks,
 		"lanes": final_lanes,
@@ -214,7 +235,11 @@ static func _resolve_death(
 		)
 	else:
 		_kill(state, target)
-		_emit(state, event, phase, target, roll["text"], OUTCOME_DEATH, _render(event, target, {}))
+		# an AVOIDABLE death is rolled against something the raider controls (they
+		# stood in it); a CASCADE death has no attribute of their own — the raid
+		# ran dry and it caught them. Only the first is theirs to answer for.
+		var outcome := OUTCOME_CASCADE_DEATH if attribute.is_empty() else OUTCOME_DEATH
+		_emit(state, event, phase, target, roll["text"], outcome, _render(event, target, {}))
 
 
 static func _resolve_save(
@@ -500,6 +525,52 @@ static func _roll_value(
 
 
 # --- outcome ------------------------------------------------------------------
+
+
+## MI-005 — a `tank_survival` wipe used to leave the tank standing. The stage-3
+## tank check is a LANE check: it can fail with no death event anywhere in the
+## timeline, so `participants[].died` was false for everybody and the post-night
+## report cheerfully showed "0 deaths" on a wipe whose stated cause was the tank
+## dying. The first pillar is legible failure; a report that contradicts its own
+## verdict is the opposite of that.
+##
+## He falls now. But `tank_overwhelmed` is NOT `tank_death`: it carries no rating
+## penalty, because a tank who is out-damaged — usually for want of the crit-immune
+## cap — did not author his own death. The guildmaster fielded him.
+static func _emit_tank_overwhelmed(
+	input: Dictionary, state: Dictionary, verdict: Dictionary, checks: Array
+) -> void:
+	if str(verdict["outcome"]) == "kill":
+		return
+	if str(verdict["wipe_reason"]).get_slice(":", 0) != "tank_survival":
+		return
+	var main_tank := Contribution.find_main_tank(input["participants"])
+	if main_tank.is_empty() or state["dead_set"].has(int(main_tank["avatar_id"])):
+		return  # the timeline already killed him; do not kill him twice
+
+	var by_kind := {}
+	for check: Dictionary in checks:
+		by_kind[str(check["check"])] = check
+	var phases := _sorted_phases(input["phases"])
+	var last_phase: Dictionary = (
+		phases[phases.size() - 1] if not phases.is_empty() else {"phase_order": 1}
+	)
+	var uncapped := int(main_tank.get("uncrittable", 0)) == 0
+	var line := (
+		"%s is not crit-immune — the boss crits through him and he drops."
+		if uncapped
+		else "%s is simply out-damaged — the healing cannot keep him up, and he drops."
+	)
+	_kill(state, main_tank)
+	_emit(
+		state,
+		{},
+		last_phase,
+		main_tank,
+		str(by_kind["tank"]["detail"]) if by_kind.has("tank") else "-",
+		OUTCOME_TANK_OVERWHELMED,
+		line % main_tank["handle"]
+	)
 
 
 ## The climax. `wipe_reason` is a diagnostic string — precise, and far too long to

@@ -245,3 +245,21 @@ Also fixed: the M3-001 fixtures carried `effect_category="fixture"` (placeholder
 **Deliberately NOT done: a live boss-health bar.** The engine does not model boss HP over time — it derives final progress from the DPS-check margin. A smoothly draining bar would be the feed **inventing a number the simulation never computed**, which is the exact class of failure this intervention exists to stop. Boss health is reported where it is real: as the outcome. A live bar requires the engine to model HP per phase first, and that is a ticket, not a UI tweak.
 
 **Consequence / open issue.** A `tank_survival` wipe currently marks **nobody dead** — the tank check fails as a *check*, no death event fires, so `participants[].died` is false for all and the post-night report can show 0 deaths on a wipe caused by the tank dying. The log now handles this honestly (the beat says "cannot hold it", not "is cut down"; the raid counter drops to 0 because a wipe *is* a wipe), but the incoherence is real and is assigned to **MI-005**: either the tank gate emits a real `tank_death` event, or the report stops implying deaths it does not have.
+
+## ADR-0028 · 2026-07-12 · A dominant check is not a guilty person (MI-005)
+
+**Decision.** Player-facing failure is a **hierarchy**, never one sentence: **primary cause** (the gate that failed) → **contributing factors** (the coupled conditions that made it fatal) → **key moment** (a person, *only* when directly attributable — usually nobody) → **recommendation** (the lever to pull) → **recurrence** ("the same wall, not bad luck"). `sim/resolution/diagnosis.gd` is the pure module; `docs/guildmaster-diagnostics.md` is the contract. `wipe_reason` survives as **internal shorthand** — the numeric string for logs, tests and the balance lab — and is no longer shown to the player anywhere.
+
+**Why.** "Every wipe names a culprit" is half a pillar. Failures here are deliberately COUPLED (low awareness → avoidable damage → healing strain → tank drops → collapse), so the dominant check is not a root cause and certainly not a guilty person. A UI that points at a name teaches the player to bench their lowest-rated raider instead of fixing the system.
+
+**🔒 THE ANTI-SCAPEGOAT RULE — a raider may be named, or rated down, ONLY for a failure they authored** (they were rolled against something they control). This is a **rating** rule, not a copy rule: the player does not read the design doc, they read the ratings table, and a tank sitting at the bottom of it IS the game telling them to bench him.
+
+**Two live bugs, the same shape, neither cosmetic:**
+1. **`tank_overwhelmed` did not exist.** The stage-3 tank check is a *lane* check — it fails with no death event anywhere in the timeline. A `tank_survival` wipe left the tank standing and the report showed **0 deaths on a wipe caused by the tank dying** (surfaced by MI-004). He falls now — as his own outcome, with a **0.0** rating delta, because the guildmaster fielded him uncapped; he did not author it. Measured: an out-damaged tank went from **floored at 1.0/10** to **5.3/10, mid-table**.
+2. **A cascade death was billed as an avoidable one.** The resolution doc always called `cascade_death` "death, *not own fault*", but the engine emitted a plain `death` — so the raider the healing shortfall happened to catch was docked the same **−2.0** as somebody who stood in the fire, and could be named as the "key moment". Now its own outcome, **0.0**.
+
+Standing in the fire (`death`) and dropping a duty you were handed (`duty_fail`) still cost **−2.0**. The point is not that nothing is ever anyone's fault.
+
+**Also fixed: recurrence never worked.** `top_wipe_reasons` tallied the raw `wipe_reason`, which embeds margins and probabilities — so every wipe hashed unique, every count came out as 1, and the one sentence that tells a player *"you are not unlucky, you are stuck"* could never appear. Wipes group on the **primary cause** now.
+
+**Consequence.** **Balance is untouched** — both deaths are emitted *after* the verdict, so the checks and collapse fraction that decided the pull never see them. The harness reports identical win rates to the point (40 / 21 / 11 / 5 % at starting gear). This closes an incoherence; it does not open a new failure path.

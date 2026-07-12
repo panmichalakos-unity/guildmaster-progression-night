@@ -27,6 +27,12 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 				"attempts": 0,
 				"killed": false,
 				"last_wipe_reason": "",
+				# MI-005: the structured diagnosis of the most recent wipe, and the
+				# tally that makes RECURRENCE sayable ("the same wall, 4 pulls running")
+				"last_diagnosis": {},
+				"cause_counts": {},
+				"wipes": 0,
+				"recurrence": "",
 			}
 			bosses.append(by_boss[slug])
 		var boss: Dictionary = by_boss[slug]
@@ -38,10 +44,26 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 				loot_rows.append_array(_loot_for_encounter(db, slug))
 		else:
 			wipes += 1
+			boss["wipes"] = int(boss["wipes"]) + 1
 			var reason := str(pull.get("wipe_reason", ""))
 			boss["last_wipe_reason"] = reason
-			if not reason.is_empty():
-				wipe_reasons[reason] = int(wipe_reasons.get(reason, 0)) + 1
+			var diagnosis: Dictionary = pull.get("diagnosis", {})
+			boss["last_diagnosis"] = diagnosis
+
+			# Tally the PRIMARY CAUSE, never the raw `wipe_reason`: that string
+			# carries margins and probabilities ("margin -18.6, p=0.07"), so it is
+			# unique per pull and every count silently came out as 1. Recurrence —
+			# the thing that tells a player they are stuck on ONE wall — could not
+			# surface at all.
+			var cause := (
+				str(diagnosis.get("primary_cause", ""))
+				if not diagnosis.is_empty()
+				else reason.get_slice(":", 0)
+			)
+			if not cause.is_empty():
+				wipe_reasons[cause] = int(wipe_reasons.get(cause, 0)) + 1
+				var counts: Dictionary = boss["cause_counts"]
+				counts[cause] = int(counts.get(cause, 0)) + 1
 
 		for participant: Dictionary in result["participants"]:
 			var avatar_id := int(participant["avatar_id"])
@@ -83,11 +105,23 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 	)
 
 	var top_wipes: Array[Dictionary] = []
-	for reason: String in wipe_reasons:
-		top_wipes.append({"reason": reason, "count": int(wipe_reasons[reason])})
+	for cause: String in wipe_reasons:
+		(
+			top_wipes
+			. append(
+				{
+					"reason": cause,
+					"label": str(Diagnosis.CAUSE_LABELS.get(cause, cause)),
+					"count": int(wipe_reasons[cause]),
+				}
+			)
+		)
 	top_wipes.sort_custom(
 		func(a: Dictionary, b: Dictionary) -> bool: return int(a["count"]) > int(b["count"])
 	)
+
+	for boss: Dictionary in bosses:
+		boss["recurrence"] = _recurrence(boss)
 
 	var mvp := {} if ratings.is_empty() else ratings[0]
 	var progress := _learning_progress(db, pulls, guild_id)
@@ -104,6 +138,26 @@ static func build(db: Variant, pulls: Array, guild_id: int = 1) -> Dictionary:
 		"learning": progress,
 		"summary_line": _summary_line(bosses, kills, wipes),
 	}
+
+
+## "Tank survival failed 4 of your 5 pulls here." The single most useful sentence
+## on the page: it tells the player whether they are being unlucky or whether they
+## are hitting the SAME wall over and over and have not changed anything.
+static func _recurrence(boss: Dictionary) -> String:
+	var counts: Dictionary = boss["cause_counts"]
+	var wipes := int(boss["wipes"])
+	if counts.is_empty() or wipes < 2:
+		return ""
+	var dominant := ""
+	var best := 0
+	for cause: String in counts:
+		if int(counts[cause]) > best:
+			dominant = cause
+			best = int(counts[cause])
+	if best < 2:
+		return ""
+	var label := str(Diagnosis.CAUSE_LABELS.get(dominant, dominant))
+	return "%s ended %d of your %d wipes here — the same wall, not bad luck." % [label, best, wipes]
 
 
 static func _handles(db: Variant, avatar_ids: Array) -> Dictionary:

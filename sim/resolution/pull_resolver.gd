@@ -52,10 +52,13 @@ static func resolve(input: Dictionary, rng: RngStream) -> Dictionary:
 	var result := PullContracts.make_result()
 	result["pull"] = {
 		"outcome": outcome,
+		# INTERNAL shorthand: the precise numeric string, for logs, tests and the
+		# balance lab. Never the player-facing diagnosis (MI-005).
 		"wipe_reason": str(timeline["wipe_reason"]),
-		# MI-002/MI-005: the primary cause is `wipe_reason`; these are the
-		# coupled conditions that made it fatal. The report shows both.
 		"contributing_factors": timeline["contributing_factors"],
+		# THE player-facing hierarchy: primary cause -> contributing factors ->
+		# key moment (usually nobody) -> recommendation. {} on a kill.
+		"diagnosis": timeline["diagnosis"],
 		"duration_sec": _duration(outcome, timeline),
 		"attempt_number": int(input["attempt_number"]),
 		"boss_hp_pct_at_end": 0 if outcome == "kill" else 100 - int(timeline["progress_pct"]),
