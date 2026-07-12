@@ -286,6 +286,27 @@ def check_m1_coverage(con: sqlite3.Connection, present: set[str], c: Checker) ->
     if "event_type.csv" in present:
         c.check(count("SELECT COUNT(*) FROM event_type") >= 7,
                 "M1: at least 7 event types (core-5 + assigned_duty + cooldown)")
+    if "encounter.csv" in present and "encounter_contract.csv" in present:
+        # MI-009: "retuning a boss without updating its contract is a bug" was a
+        # convention, and conventions do not fail builds. Every boss must carry a
+        # balance contract for the harness to assert it against — a boss with no
+        # contract is a boss nobody is checking, and that is how three of four of
+        # them sat at a 0% win rate while CI stayed green.
+        orphans = con.execute(
+            "SELECT e.slug FROM encounter e WHERE NOT EXISTS "
+            "(SELECT 1 FROM encounter_contract ec WHERE ec.encounter_id = e.encounter_id)"
+        ).fetchall()
+        c.check(not orphans,
+                f"MI-009: every encounter has a balance contract ({[o[0] for o in orphans] or 'all good'})")
+        bad = con.execute(
+            "SELECT e.slug FROM encounter_contract ec JOIN encounter e "
+            "ON e.encounter_id = ec.encounter_id "
+            "WHERE ec.win_lo >= ec.win_hi OR ec.expected_gear > ec.farm_gear "
+            "OR ec.farm_gear > 1.65 OR ec.signature_min_delta <= 0"
+        ).fetchall()
+        c.check(not bad,
+                "MI-009: contracts are coherent — win_lo < win_hi, expected_gear <= farm_gear, "
+                f"farm gear inside the reachable ceiling x1.64 ({[b[0] for b in bad] or 'all good'})")
     if "encounter.csv" in present and "raid.csv" in present:
         thin = con.execute(
             "SELECT r.slug, COUNT(e.encounter_id) FROM raid r "

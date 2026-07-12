@@ -1,5 +1,5 @@
 {
-	"_comment": "Starter tuning constants (M1-003). EVERY value here is a symbolic placeholder — the M3-005 batch harness and playtesting are the real judges. Namespaced by system; sim code reads this file directly (it is config seed data, not a DB table). Change values freely; change KEY NAMES only with a cross-validated ticket.",
+	"_comment": "Starter tuning constants (M1-003). EVERY value here is a symbolic placeholder \u00e2\u20ac\u201d the M3-005 batch harness and playtesting are the real judges. Namespaced by system; sim code reads this file directly (it is config seed data, not a DB table). Change values freely; change KEY NAMES only with a cross-validated ticket.",
 	"resolution": {
 		"winrate_target_band": [
 			0.6,
@@ -7,7 +7,7 @@
 		],
 		"sigmoid_scale": 12,
 		"hard_check_sigmoid_scale": 7,
-		"tank_healing_share": 0.35,
+		"tank_healing_share": 0.5,
 		"reference_comp": {
 			"tank": 2,
 			"healer": 5,
@@ -35,7 +35,7 @@
 		"death_morale": -1,
 		"save_morale": 2,
 		"form_rate": 0.8,
-		"healing_deficit_lethality": 0.6
+		"healing_deficit_lethality": 1.0
 	},
 	"gear": {
 		"spec_fit_multiplier": 0.5,

@@ -1,9 +1,55 @@
 # Guildmaster: Progression Night — Encounter Progression Contracts (v1.0)
 
-**Created by MI-001 (2026-07-11).** The missing artifact that let the tier become uncompletable: boss demands were authored as "symbolic" numbers with **nothing tying them to what a real roster produces**. This document is now the source of truth. Retuning a boss without updating its contract is a bug.
+**Created by MI-001 (2026-07-11). Retuned by MI-009 (2026-07-12).** The missing artifact that let the tier become uncompletable: boss demands were authored as "symbolic" numbers with **nothing tying them to what a real roster produces**. This document is the source of truth, and **`data/seeds/encounter_contract.csv` is now its machine-readable half** — the harness asserts every boss against its own row, so "retuning a boss without updating its contract is a bug" is a **failing build** rather than a convention.
 
 > **The governing question for every boss:**
 > *At what plausible roster state should this boss be attempted, and what player-controlled intervention makes the next attempt better?*
+
+---
+
+## ⚠️ RETUNED BY MI-009 (2026-07-12) — READ THIS BEFORE THE TABLES BELOW
+
+**The seed values and win-rate tables in §2 and §2.5 are superseded by the table here.**
+
+MI-009's prep-leverage probes found that **healers were a trap**: bringing more of them made the raid *worse on every boss* — including **The Slagbeast, the fight whose entire identity is the healing wall.** The optimal play was to strip healers and stack DPS. Three things conspired, and all three were authored here:
+
+| | |
+|---|---|
+| **The demand was unreachable** | Slagbeast asked for **77** healing against a lane that tops out near **46**. Not a wall — a locked door. A marginal healer barely dented it. |
+| **The healers' contribution was wasted** | Slagbeast's tank check was *saturated* (p≈0.94), so the healing that feeds tank survival bought nothing… |
+| **…while the DPS they cost was not** | …and the damage sacrificed came straight off `dps_enrage`, the only gate actually deciding the fight. |
+
+**The fix** (seed data + two tuning constants): healing demands made **closable** by a good healer comp; `tank_healing_share` 0.35 → **0.50**, so healers protect a gate that actually binds; `healing_deficit_lethality` 0.6 → **1.0** plus two more cascade beats on Slagbeast, so a thin healing lane genuinely **bleeds bodies**.
+
+**The Fun Gate verdict (ADR-0029) was a hard constraint.** The win rate at the default comp had to land where Panos played it — and it does, within 2 points on every boss. The *gradient* changed; the *feel* did not.
+
+> ### 🔒 "More healers is always better" is **NOT** the rule.
+> Over-healing a DPS race *should* cost you — healers run **−13.5pp** on Cinderlords, and that opportunity cost is what makes comp a **decision** rather than a checklist. What a lever may never do is fail on **its own** boss. That is the invariant the harness asserts.
+
+### The contracts as they now stand
+
+| Boss | Expected gear | Win @ that gear | Band | Farm @x1.64 | Dominant failure | **Signature lever** |
+|---|---|---|---|---|---|---|
+| Gatewarden Krogg | **x1.00** (a fresh guild) | **40%** | 30–50% | 97% | `dps_enrage` | **tank_cap · +40.0pp** |
+| Forgemaster Vell | x1.12 | **34%** | 24–44% | 65% | `dps_enrage` | **duties · +5.5pp** |
+| The Slagbeast | x1.28 | **32%** | 22–42% | 58% | `tank_survival` | **healers · +10.0pp** |
+| The Cinderlords | x1.42 | **23%** | 13–33% | 45% | `dps_enrage` | **consumables · +6.0pp** |
+
+**Slagbeast dies to `tank_survival`, and that is correct.** A healing wall kills by running the healers dry until the tank drops. It is not Krogg's readiness gate in disguise, and the diagnosis (ADR-0028) keeps them apart exactly where it matters: Krogg's contributing factor is *"not crit-immune"*, Slagbeast's is *"the healing lane fell short"*, and its recommendation reads *"put more healing on the tank — he is being out-damaged, not out-played."*
+
+### Prep leverage — is raid prep tactics, or administration?
+
+Same seed, same roster, same gear; **one** decision changed. Percentage points gained by making the **right** call:
+
+| Lever | Krogg | Vell | Slagbeast | Cinderlords |
+|---|---|---|---|---|
+| **tank_cap** | **+40.0** | +0.0 | −2.5 | +0.0 |
+| **duties** | +0.0 | **+5.5** | +2.0 | +2.5 |
+| **healers** | −3.0 | −13.5 | **+10.0** | −12.5 |
+| **range_comp** | +14.5 | +12.5 | +8.0 | +10.0 |
+| **consumables** | +10.0 | +7.0 | +11.0 | **+6.0** |
+
+Every lever is a real decision **somewhere**, and every boss answers to **its own**. Enforced in CI by `--probes`.
 
 ---
 

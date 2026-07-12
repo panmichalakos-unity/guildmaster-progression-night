@@ -1,0 +1,5 @@
+encounter_slug,expected_gear,win_lo,win_hi,farm_gear,farm_win_min,dominant_failure,signature_lever,signature_min_delta
+gatewarden_krogg,1.00,0.30,0.50,1.64,0.85,dps_enrage,tank_cap,20.0
+forgemaster_vell,1.12,0.24,0.44,1.64,0.55,dps_enrage,duties,3.0
+slagbeast,1.28,0.22,0.42,1.64,0.48,tank_survival,healers,3.0
+cinderlords,1.42,0.13,0.33,1.64,0.35,dps_enrage,consumables,3.0

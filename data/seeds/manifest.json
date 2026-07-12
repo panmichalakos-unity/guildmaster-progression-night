@@ -1,51 +1,198 @@
 {
 	"version": 1,
-	"comment": "Seed manifest — files load in array order (dependency order). See data/seeds/README.md for the convention.",
+	"comment": "Seed manifest \u00e2\u20ac\u201d files load in array order (dependency order). See data/seeds/README.md for the convention.",
 	"files": [
-		{ "file": "role.csv", "table": "role" },
-		{ "file": "slot.csv", "table": "slot" },
-		{ "file": "life_situation.csv", "table": "life_situation" },
-		{ "file": "class.csv", "table": "class" },
-		{ "file": "spec.csv", "table": "spec", "refs": [
-			{ "column": "class_slug", "table": "class", "as": "class_id" },
-			{ "column": "role_slug", "table": "role", "as": "role_id" }
-		] },
-		{ "file": "raid_utility.csv", "table": "raid_utility" },
-		{ "file": "spec_utility.csv", "table": "spec_utility",
-			"key": ["spec_id", "utility_id"], "refs": [
-			{ "column": "spec_slug", "table": "spec", "as": "spec_id" },
-			{ "column": "utility_slug", "table": "raid_utility", "as": "utility_id" }
-		] },
-		{ "file": "synergy_tag.csv", "table": "synergy_tag" },
-		{ "file": "spec_synergy_tag.csv", "table": "spec_synergy_tag",
-			"key": ["spec_id", "synergy_tag_id"], "refs": [
-			{ "column": "spec_slug", "table": "spec", "as": "spec_id" },
-			{ "column": "synergy_tag_slug", "table": "synergy_tag", "as": "synergy_tag_id" }
-		] },
-		{ "file": "expansion.csv", "table": "expansion" },
-		{ "file": "season.csv", "table": "season", "refs": [
-			{ "column": "expansion_slug", "table": "expansion", "as": "expansion_id" }
-		] },
-		{ "file": "raid.csv", "table": "raid", "refs": [
-			{ "column": "season_slug", "table": "season", "as": "season_id" }
-		] },
-		{ "file": "encounter.csv", "table": "encounter", "refs": [
-			{ "column": "raid_slug", "table": "raid", "as": "raid_id" }
-		] },
-		{ "file": "encounter_phase.csv", "table": "encounter_phase", "refs": [
-			{ "column": "encounter_slug", "table": "encounter", "as": "encounter_id" }
-		] },
-		{ "file": "event_type.csv", "table": "event_type" },
-		{ "file": "encounter_event.csv", "table": "encounter_event", "refs": [
-			{ "column": "encounter_slug", "table": "encounter", "as": "encounter_id" },
-			{ "column": "phase_slug", "table": "encounter_phase", "as": "phase_id" },
-			{ "column": "event_type_slug", "table": "event_type", "as": "event_type_id" }
-		] },
-		{ "file": "loot_item.csv", "table": "loot_item", "refs": [
-			{ "column": "encounter_slug", "table": "encounter", "as": "encounter_id" },
-			{ "column": "slot_slug", "table": "slot", "as": "slot_id" },
-			{ "column": "role_slug", "table": "role", "as": "role_id" }
-		] },
-		{ "file": "consumable.csv", "table": "consumable" }
+		{
+			"file": "role.csv",
+			"table": "role"
+		},
+		{
+			"file": "slot.csv",
+			"table": "slot"
+		},
+		{
+			"file": "life_situation.csv",
+			"table": "life_situation"
+		},
+		{
+			"file": "class.csv",
+			"table": "class"
+		},
+		{
+			"file": "spec.csv",
+			"table": "spec",
+			"refs": [
+				{
+					"column": "class_slug",
+					"table": "class",
+					"as": "class_id"
+				},
+				{
+					"column": "role_slug",
+					"table": "role",
+					"as": "role_id"
+				}
+			]
+		},
+		{
+			"file": "raid_utility.csv",
+			"table": "raid_utility"
+		},
+		{
+			"file": "spec_utility.csv",
+			"table": "spec_utility",
+			"key": [
+				"spec_id",
+				"utility_id"
+			],
+			"refs": [
+				{
+					"column": "spec_slug",
+					"table": "spec",
+					"as": "spec_id"
+				},
+				{
+					"column": "utility_slug",
+					"table": "raid_utility",
+					"as": "utility_id"
+				}
+			]
+		},
+		{
+			"file": "synergy_tag.csv",
+			"table": "synergy_tag"
+		},
+		{
+			"file": "spec_synergy_tag.csv",
+			"table": "spec_synergy_tag",
+			"key": [
+				"spec_id",
+				"synergy_tag_id"
+			],
+			"refs": [
+				{
+					"column": "spec_slug",
+					"table": "spec",
+					"as": "spec_id"
+				},
+				{
+					"column": "synergy_tag_slug",
+					"table": "synergy_tag",
+					"as": "synergy_tag_id"
+				}
+			]
+		},
+		{
+			"file": "expansion.csv",
+			"table": "expansion"
+		},
+		{
+			"file": "season.csv",
+			"table": "season",
+			"refs": [
+				{
+					"column": "expansion_slug",
+					"table": "expansion",
+					"as": "expansion_id"
+				}
+			]
+		},
+		{
+			"file": "raid.csv",
+			"table": "raid",
+			"refs": [
+				{
+					"column": "season_slug",
+					"table": "season",
+					"as": "season_id"
+				}
+			]
+		},
+		{
+			"file": "encounter.csv",
+			"table": "encounter",
+			"refs": [
+				{
+					"column": "raid_slug",
+					"table": "raid",
+					"as": "raid_id"
+				}
+			]
+		},
+		{
+			"file": "encounter_contract.csv",
+			"table": "encounter_contract",
+			"key": [
+				"encounter_id"
+			],
+			"refs": [
+				{
+					"column": "encounter_slug",
+					"table": "encounter",
+					"as": "encounter_id"
+				}
+			]
+		},
+		{
+			"file": "encounter_phase.csv",
+			"table": "encounter_phase",
+			"refs": [
+				{
+					"column": "encounter_slug",
+					"table": "encounter",
+					"as": "encounter_id"
+				}
+			]
+		},
+		{
+			"file": "event_type.csv",
+			"table": "event_type"
+		},
+		{
+			"file": "encounter_event.csv",
+			"table": "encounter_event",
+			"refs": [
+				{
+					"column": "encounter_slug",
+					"table": "encounter",
+					"as": "encounter_id"
+				},
+				{
+					"column": "phase_slug",
+					"table": "encounter_phase",
+					"as": "phase_id"
+				},
+				{
+					"column": "event_type_slug",
+					"table": "event_type",
+					"as": "event_type_id"
+				}
+			]
+		},
+		{
+			"file": "loot_item.csv",
+			"table": "loot_item",
+			"refs": [
+				{
+					"column": "encounter_slug",
+					"table": "encounter",
+					"as": "encounter_id"
+				},
+				{
+					"column": "slot_slug",
+					"table": "slot",
+					"as": "slot_id"
+				},
+				{
+					"column": "role_slug",
+					"table": "role",
+					"as": "role_id"
+				}
+			]
+		},
+		{
+			"file": "consumable.csv",
+			"table": "consumable"
+		}
 	]
 }
