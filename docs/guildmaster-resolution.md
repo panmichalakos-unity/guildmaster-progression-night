@@ -108,9 +108,10 @@ Each event: pick target → roll `attribute vs severity` → apply effects (dama
 **`log_template` examples:** `"{tank} eats a fifth stack and gibs — wipe."` · `"Fire elixir holds — {name} survives the breath at 200 HP."` · `"{name} is locked in tonight, dragging the DPS check alone."`
 
 ## Involvement integration
-The **same pipeline** runs at every involvement level:
-- **Auto** — default policies (assignments, consumable tiers, cooldown timing) drive the rolls.
-- **Assisted / manual** — your jump-ins inject directives at **phase boundaries** and **cooldown-moment events** (move, pop CD, swap, wipe-call). Directives still route through the participant's attributes — a shaky hand fumbles the right call. Manual is a lever, not a god button.
+The **same pipeline** runs at every involvement level — involvement changes **who authors the inputs**, never how the sim resolves them (**full contract: `guildmaster-involvement.md`**, ADR-0033).
+- **Auto (Instant)** — default policies (assignments, consumable tiers, cooldown timing) drive the rolls; the engine's `NightRunner.run_night()` already *is* this mode. Same seed + same inputs = same outcome as a hand-played night.
+- **Assisted / manual** — the **v1 fence**: strategy, lineup, between-pull swaps, wipe calls. Directives still route through the participant's attributes — a shaky hand fumbles the right call; manual is a lever, not a god button.
+- **Mid-pull jump-ins** (directives injected at **phase boundaries** and **cooldown-moment events** — move, pop CD, swap mid-pull) are the **v1.1 layer** (see "Layer later" below). Do not build them into v1.
 
 ## Data model touchpoints
 - **Reads:** PLAYER traits + PLAYER_WEEK_STATE · AVATAR power + familiarity + AVATAR_RESISTANCE · assignments (PULL_PARTICIPANT) · PULL_CONSUMABLE · RELATIONSHIP · PLAYER_QUIRK · ENCOUNTER + ENCOUNTER_PHASE + ENCOUNTER_EVENT · GUILD_ENCOUNTER_PROGRESS.
