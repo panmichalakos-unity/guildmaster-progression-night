@@ -5,6 +5,9 @@ extends GdUnitTestSuite
 ## legible fix with a kill in a handful of pulls. If any assertion here fails, the
 ## game's opening no longer teaches — that is a release blocker, not a tuning nit.
 ##
+## M5-001: repointed at the REAL genesis path (`Genesis.new_in_memory`), so this
+## proves guild genesis — not the retired demo scaffolding — carries the opening.
+##
 ## See docs/guildmaster-first-session.md.
 
 const BOSS := "gatewarden_krogg"
@@ -20,7 +23,7 @@ const GUILD_SEEDS: Array[int] = [133742, 1, 42, 777, 90210, 2024, 55, 8, 314, 27
 
 func test_default_lineup_fields_a_crittable_main_tank() -> void:
 	for guild_seed in GUILD_SEEDS:
-		var campaign := DemoCampaign.build(guild_seed)
+		var campaign := Genesis.new_in_memory({"seed": guild_seed})
 		assert_dict(campaign).is_not_empty()
 		var main_tank := _main_tank(campaign, PullInputLoader.auto_lineup(campaign["db"]))
 
@@ -32,7 +35,7 @@ func test_default_lineup_fields_a_crittable_main_tank() -> void:
 
 func test_prep_warns_before_the_player_pulls() -> void:
 	for guild_seed in GUILD_SEEDS:
-		var campaign := DemoCampaign.build(guild_seed)
+		var campaign := Genesis.new_in_memory({"seed": guild_seed})
 		var prep := RaidPrep.build(
 			campaign["db"], int(campaign["event_id"]), PullInputLoader.auto_lineup(campaign["db"])
 		)
@@ -55,7 +58,7 @@ func test_prep_warns_before_the_player_pulls() -> void:
 
 func test_unfixed_lineup_is_a_wall_that_names_the_tank() -> void:
 	for guild_seed in GUILD_SEEDS:
-		var campaign := DemoCampaign.build(guild_seed)
+		var campaign := Genesis.new_in_memory({"seed": guild_seed})
 		var measured := _measure(campaign["db"], PullInputLoader.auto_lineup(campaign["db"]))
 
 		(
@@ -75,7 +78,7 @@ func test_unfixed_lineup_is_a_wall_that_names_the_tank() -> void:
 
 func test_benching_the_star_tank_promotes_a_crit_immune_one() -> void:
 	for guild_seed in GUILD_SEEDS:
-		var campaign := DemoCampaign.build(guild_seed)
+		var campaign := Genesis.new_in_memory({"seed": guild_seed})
 		var main_tank := _main_tank(campaign, _fixed_lineup(campaign))
 		(
 			assert_int(int(main_tank["uncrittable"]))
@@ -89,7 +92,7 @@ func test_benching_the_star_tank_promotes_a_crit_immune_one() -> void:
 
 func test_the_one_fix_turns_the_wall_into_a_kill() -> void:
 	for guild_seed in GUILD_SEEDS:
-		var campaign := DemoCampaign.build(guild_seed)
+		var campaign := Genesis.new_in_memory({"seed": guild_seed})
 		var measured := _measure(campaign["db"], _fixed_lineup(campaign))
 		var pulls_to_kill := (
 			999.0 if measured["win_rate"] < 1.0 else 100.0 / float(measured["win_rate"])
@@ -108,8 +111,8 @@ func test_the_one_fix_turns_the_wall_into_a_kill() -> void:
 
 
 func test_night_one_is_deterministic() -> void:
-	var first := DemoCampaign.build(133742)
-	var second := DemoCampaign.build(133742)
+	var first := Genesis.new_in_memory({"seed": 133742})
+	var second := Genesis.new_in_memory({"seed": 133742})
 	assert_dict(first["scenario"]).is_equal(second["scenario"])
 	assert_array(PullInputLoader.auto_lineup(first["db"])).is_equal(
 		PullInputLoader.auto_lineup(second["db"])

@@ -87,6 +87,10 @@ Now a tank can out-gear the room and still be crittable — so **fielding the ta
 
 ---
 
+## 4.5 Where this lives now (M5-001)
+
+The curation moved out of the M4 slice scaffolding into **`sim/campaign/first_session.gd`** (`FirstSession.curate`), which **guild genesis** (`sim/campaign/genesis.gd`) calls for **every** campaign (ADR-0034 — the readiness gate is the prep loop, not a one-time tutorial). `game/demo_campaign.gd` is now a thin shim over `Genesis.new_in_memory`, and `tests/first_night_test.gd` runs against the genesis path directly — so this contract is enforced on the **real new-game flow**, not retired scaffolding. The involvement **PIN** (ADR-0033) is the piece that fires only once; the scenario is always live.
+
 ## 5. What this contract does **not** do
 
 - It does not curate DPS, healing, comp, or range. Those levers exist (measured: comp is worth ~11 points, healer count ~4 on this boss) but they are **not** Night One's lesson. One legible cause, one decision. Stacking flaws would muddy which fix actually mattered — the exact failure the intervention doc warns about.
