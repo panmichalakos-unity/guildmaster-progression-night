@@ -352,3 +352,19 @@ Three faults conspired: Slagbeast's healing demand was **unreachable** (77 again
 **Season = Tier (I-03), honestly.** Genesis anchors at the FIRST season by `tier_order` — Tier 1 today, still Tier 1 when MC-001 adds Tier 2 as the second season. It never fabricates a season with no raid content, so the one-tier reality (MC-001 pending) does not produce a broken save.
 
 **Consequence.** M5-001 is the first Phase-B ticket to land. The rebuild path (reputation/gold scaled by `genesis.rebuild_*_mult`, or explicit overrides) is ready for M9-004. **Verified:** 170/170 tests, project boot, seed_check, and the genesis/first-night/slice smokes all green; the first-night arc (5.3% → 44%) and full-tier slice (18 pulls / 4 kills) are byte-identical through genesis. **Not verified locally:** `gdformat`/`gdlint` — the machine's Windows Application Control policy is currently blocking those binaries (an environment change, not a code issue); CI runs them on Linux.
+
+## ADR-0035 · 2026-07-12 · The weekly turn loop — a save-backed day cursor (M5-002)
+
+**Decision.** The campaign advances through a week with `TurnLoop.advance(db, rng)` — an FM-style "continue" that ticks recovery across empty days and stops ON the next scheduled event (raid / dungeon / rest / social) for the player to resolve; `complete_event()` frees it to advance again. Weeks roll automatically until the season's last week, where the loop stops for grading (M9). New modules: `sim/campaign/{calendar,turn_loop,week_state}.gd`.
+
+**Three small decisions worth recording:**
+
+1. **A day cursor on the save, not derived state.** Migration `0005` adds `GAME_STATE.current_day` (0 = planning; 1–7 = the day reached). The alternative — deriving position purely from `CALENDAR_EVENT.status` — cannot tell which empty days have already been ticked, so recovery would double-apply. Time stays represented through `GAME_STATE + WEEK + CALENDAR_EVENT`; no wall clock.
+
+2. **Lazy week-state snapshot keeps genesis untouched.** `PLAYER_WEEK_STATE` rows are created on first need (`WeekState.ensure`), carrying the prior week's morale/fatigue/form forward (defaults for week 1). This let M5-002 be **purely additive** — the just-shipped M5-001 genesis was not re-touched, and its week-1 raid event is picked up by the loop naturally. (Consequence: genesis's week 1 has only the raid; weeks 2+ get the default raid+rest calendar. Harmless — week 1 simply has more empty days.)
+
+3. **The season boundary stops, it does not loop.** At `week_number == expansion.season_length_weeks` the loop returns `season_complete` and sets phase `grade` rather than creating a week 15 — the honest boundary, since grading / sacking / the roll into Season 2 (Tier 2) are M9 and MC-001.
+
+**Deferred (noted, not done here):** applying the raid night's morale/fatigue/form **state_deltas** to `PLAYER_WEEK_STATE` — the resolver returns them but nothing writes them yet (the M4 "known gap"). M5-002 gives empty-day *recovery*; the raid-night *cost* is a downstream resolve step (M5-004 / a resolve phase).
+
+**Verified:** 178/178 tests, boot, seed_check, and the turn-loop / genesis / first-night / slice smokes all green; the loop is deterministic (same seed → identical transcript) and fully save-backed (progression re-read from the DB, never UI-held). **Not verified locally:** gdformat/gdlint — still blocked by the dev machine's Windows Application Control policy (ADR-0034); CI runs them on Linux.

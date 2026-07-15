@@ -93,5 +93,10 @@
 			14,
 			22
 		]
+	},
+	"calendar": {
+		"empty_day_fatigue_recovery": 4,
+		"raid_day": 3,
+		"rest_day": 6
 	}
 }
