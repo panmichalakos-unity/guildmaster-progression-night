@@ -15,12 +15,7 @@ const SLOT_ORDER := {"afternoon": 0, "evening": 1, "late": 2}
 ## Inserts one event and returns its id (or -1 on failure). `raid_id` is required for
 ## event_type 'raid' and ignored otherwise.
 static func schedule(
-	db: Variant,
-	week_id: int,
-	day: int,
-	time_slot: String,
-	event_type: String,
-	raid_id: int = 0
+	db: Variant, week_id: int, day: int, time_slot: String, event_type: String, raid_id: int = 0
 ) -> int:
 	var raid_ref: Variant = raid_id if event_type == "raid" and raid_id > 0 else null
 	if not db.query_with_bindings(

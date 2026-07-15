@@ -63,36 +63,36 @@ static func create_campaign(db: Variant, config: Dictionary = {}) -> Dictionary:
 		db, roster_size, RngStream.derive(seed_value, "roster_gen")
 	)
 	if RosterGen.persist(db, players).is_empty():
-		return _fail(db, "roster persist failed")
+		return _fail("roster persist failed")
 	if AvatarGen.generate_and_persist(db, RngStream.derive(seed_value, "avatar_gen")).is_empty():
-		return _fail(db, "avatar persist failed")
+		return _fail("avatar persist failed")
 
 	# 2. the game's opening — always curated (ADR-0034), in one place (FirstSession)
 	var scenario := FirstSession.curate(db)
 	if scenario.is_empty():
-		return _fail(db, "could not curate the Night One tank corps")
+		return _fail("could not curate the Night One tank corps")
 
 	# 3. the player guild + its starting standing
 	var guild_id := _create_guild(db, guild_name, tuning, config)
 	if guild_id < 0:
-		return _fail(db, "guild creation failed")
+		return _fail("guild creation failed")
 
 	# 4. the save root: GAME_STATE (anchored to Tier 1) + GAME_CONFIG
 	var anchor := GameState.create(db, seed_value)
 	if anchor.is_empty():
-		return _fail(db, "save-root creation failed")
+		return _fail("save-root creation failed")
 	if not GameConfig.create(db, config):
-		return _fail(db, "game config creation failed")
+		return _fail("game config creation failed")
 
 	# 5. the starting roster's membership (one member row per generated player)
 	if not _seat_roster(db, guild_id):
-		return _fail(db, "roster membership failed")
+		return _fail("roster membership failed")
 
 	# 6. schedule week 1's raid night, so the opening has somewhere to happen. The
 	#    full weekly calendar is M5-002; genesis schedules only the first raid.
 	var event_id := _schedule_first_raid(db, int(anchor["season_id"]), int(anchor["week_id"]))
 	if event_id < 0:
-		return _fail(db, "could not schedule the first raid night")
+		return _fail("could not schedule the first raid night")
 
 	return {
 		"db": db,
@@ -190,6 +190,6 @@ static func _schedule_first_raid(db: Variant, season_id: int, week_id: int) -> i
 	return int(db.query_result[0]["id"])
 
 
-static func _fail(db: Variant, message: String) -> Dictionary:
+static func _fail(message: String) -> Dictionary:
 	push_error("Genesis: %s" % message)
 	return {}

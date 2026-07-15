@@ -43,13 +43,19 @@ func test_genesis_creates_the_whole_save_root() -> void:
 	# a full starting roster, all seated as members
 	var roster := int(Tuning.section("genesis").get("roster_size", 28))
 	assert_int(int(_scalar(db, "SELECT COUNT(*) FROM player"))).is_equal(roster)
-	assert_int(int(_scalar(db, "SELECT COUNT(*) FROM guild_membership WHERE status = 'member'"))).is_equal(
-		roster
+	(
+		assert_int(
+			int(_scalar(db, "SELECT COUNT(*) FROM guild_membership WHERE status = 'member'"))
+		)
+		. is_equal(roster)
 	)
 	# a raid night scheduled for the opening
 	assert_int(int(c["event_id"])).is_greater(0)
-	assert_int(int(_scalar(db, "SELECT COUNT(*) FROM calendar_event WHERE event_type = 'raid'"))).is_equal(
-		1
+	(
+		assert_int(
+			int(_scalar(db, "SELECT COUNT(*) FROM calendar_event WHERE event_type = 'raid'"))
+		)
+		. is_equal(1)
 	)
 	db.close_db()
 
@@ -62,9 +68,13 @@ func test_the_save_root_anchors_at_tier_one() -> void:
 	var first_tier := int(
 		_scalar(db, "SELECT tier_order FROM season WHERE season_id = %d" % int(state["season_id"]))
 	)
-	assert_int(first_tier).override_failure_message(
-		"genesis did not anchor at Tier 1 — it started at tier_order %d" % first_tier
-	).is_equal(1)
+	(
+		assert_int(first_tier)
+		. override_failure_message(
+			"genesis did not anchor at Tier 1 — it started at tier_order %d" % first_tier
+		)
+		. is_equal(1)
+	)
 	assert_str(str(state["phase"])).is_equal("plan")
 	assert_int(int(state["rng_seed"])).is_equal(SEED)
 	db.close_db()
@@ -78,9 +88,11 @@ func test_every_involvement_domain_starts_on_the_chosen_preset() -> void:
 	var c := _campaign({"involvement_default": "instant"})
 	var db: Variant = c["db"]
 	for domain in GameConfig.DOMAINS:
-		assert_str(GameConfig.involvement_for(db, domain)).override_failure_message(
-			"domain '%s' did not inherit the 'instant' preset" % domain
-		).is_equal("instant")
+		(
+			assert_str(GameConfig.involvement_for(db, domain))
+			. override_failure_message("domain '%s' did not inherit the 'instant' preset" % domain)
+			. is_equal("instant")
+		)
 	db.close_db()
 
 
@@ -90,10 +102,14 @@ func test_the_audit_column_exists_and_defaults_to_player() -> void:
 	var c := _campaign()
 	var db: Variant = c["db"]
 	for table in ["raid_lineup", "raid_assignment", "week_action", "loot_drop"]:
-		db.query("SELECT COUNT(*) AS n FROM pragma_table_info('%s') WHERE name = 'decided_by'" % table)
-		assert_int(int(db.query_result[0]["n"])).override_failure_message(
-			"table '%s' has no decided_by column" % table
-		).is_equal(1)
+		db.query(
+			"SELECT COUNT(*) AS n FROM pragma_table_info('%s') WHERE name = 'decided_by'" % table
+		)
+		(
+			assert_int(int(db.query_result[0]["n"]))
+			. override_failure_message("table '%s' has no decided_by column" % table)
+			. is_equal(1)
+		)
 	db.close_db()
 
 
@@ -137,16 +153,25 @@ func _roster_digest(db: Variant) -> Array:
 func test_rebuild_starts_poorer_than_a_fresh_guild() -> void:
 	var fresh := _campaign()
 	var rebuild := _campaign({"seed": SEED, "is_rebuild": true})
-	var fresh_rep := int(_scalar(fresh["db"], "SELECT reputation FROM guild WHERE is_player_guild = 1"))
+	var fresh_rep := int(
+		_scalar(fresh["db"], "SELECT reputation FROM guild WHERE is_player_guild = 1")
+	)
 	var rebuild_rep := int(
 		_scalar(rebuild["db"], "SELECT reputation FROM guild WHERE is_player_guild = 1")
 	)
 	var fresh_gold := int(_scalar(fresh["db"], "SELECT gold FROM guild_treasury"))
 	var rebuild_gold := int(_scalar(rebuild["db"], "SELECT gold FROM guild_treasury"))
 
-	assert_int(rebuild_rep).override_failure_message(
-		"a rebuild (%d rep) did not start below a fresh guild (%d rep)" % [rebuild_rep, fresh_rep]
-	).is_less(fresh_rep)
+	(
+		assert_int(rebuild_rep)
+		. override_failure_message(
+			(
+				"a rebuild (%d rep) did not start below a fresh guild (%d rep)"
+				% [rebuild_rep, fresh_rep]
+			)
+		)
+		. is_less(fresh_rep)
+	)
 	assert_int(rebuild_gold).is_less(fresh_gold)
 	fresh["db"].close_db()
 	rebuild["db"].close_db()
@@ -155,6 +180,8 @@ func test_rebuild_starts_poorer_than_a_fresh_guild() -> void:
 func test_explicit_overrides_win() -> void:
 	var c := _campaign({"reputation_override": 7, "gold_override": 3})
 	var db: Variant = c["db"]
-	assert_int(int(_scalar(db, "SELECT reputation FROM guild WHERE is_player_guild = 1"))).is_equal(7)
+	assert_int(int(_scalar(db, "SELECT reputation FROM guild WHERE is_player_guild = 1"))).is_equal(
+		7
+	)
 	assert_int(int(_scalar(db, "SELECT gold FROM guild_treasury"))).is_equal(3)
 	db.close_db()

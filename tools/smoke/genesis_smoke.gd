@@ -31,7 +31,9 @@ func _init() -> void:
 	# a different seed must actually differ (else the seed is not wired through)
 	var digest_c := _build_digest(seed_value + 1)
 	if digest_c == digest_a:
-		_failures.append("seed is not wired through: seed %d == seed %d" % [seed_value, seed_value + 1])
+		_failures.append(
+			"seed is not wired through: seed %d == seed %d" % [seed_value, seed_value + 1]
+		)
 
 	if _failures.is_empty():
 		print("GENESIS SMOKE: PASS")
@@ -51,46 +53,66 @@ func _build_digest(seed_value: int) -> String:
 	var lines: PackedStringArray = []
 
 	var state := GameState.read(db)
-	lines.append(
-		(
-			"save-root: expansion=%d season=%d week=%d phase=%s rng_seed=%d"
-			% [
-				int(state["expansion_id"]),
-				int(state["season_id"]),
-				int(state["week_id"]),
-				state["phase"],
-				int(state["rng_seed"]),
-			]
+	(
+		lines
+		. append(
+			(
+				"save-root: expansion=%d season=%d week=%d phase=%s rng_seed=%d"
+				% [
+					int(state["expansion_id"]),
+					int(state["season_id"]),
+					int(state["week_id"]),
+					state["phase"],
+					int(state["rng_seed"]),
+				]
+			)
 		)
 	)
 
 	var config := GameConfig.read(db)
-	lines.append(
-		(
-			"config: difficulty=%s involvement=%s sack_risk=%d (pulls=%s loot=%s recruit=%s)"
-			% [
-				config["difficulty"],
-				config["involvement_default"],
-				int(config["sack_risk_enabled"]),
-				config["involvement_pulls"],
-				config["involvement_loot"],
-				config["involvement_recruitment"],
-			]
+	(
+		lines
+		. append(
+			(
+				"config: difficulty=%s involvement=%s sack_risk=%d (pulls=%s loot=%s recruit=%s)"
+				% [
+					config["difficulty"],
+					config["involvement_default"],
+					int(config["sack_risk_enabled"]),
+					config["involvement_pulls"],
+					config["involvement_loot"],
+					config["involvement_recruitment"],
+				]
+			)
 		)
 	)
 
-	lines.append(
-		(
-			"guild: %s  rep=%s  gold=%s  loot=%s  members=%d"
-			% [
-				handle["guild_name"],
-				_scalar(db, "SELECT reputation FROM guild WHERE guild_id = %d" % handle["guild_id"]),
-				_scalar(db, "SELECT gold FROM guild_treasury WHERE guild_id = %d" % handle["guild_id"]),
-				_scalar(
-					db, "SELECT active_loot_system FROM guild_config WHERE guild_id = %d" % handle["guild_id"]
-				),
-				int(_scalar(db, "SELECT COUNT(*) FROM guild_membership WHERE status = 'member'")),
-			]
+	(
+		lines
+		. append(
+			(
+				"guild: %s  rep=%s  gold=%s  loot=%s  members=%d"
+				% [
+					handle["guild_name"],
+					_scalar(
+						db, "SELECT reputation FROM guild WHERE guild_id = %d" % handle["guild_id"]
+					),
+					_scalar(
+						db,
+						"SELECT gold FROM guild_treasury WHERE guild_id = %d" % handle["guild_id"]
+					),
+					_scalar(
+						db,
+						(
+							"SELECT active_loot_system FROM guild_config WHERE guild_id = %d"
+							% handle["guild_id"]
+						)
+					),
+					int(
+						_scalar(db, "SELECT COUNT(*) FROM guild_membership WHERE status = 'member'")
+					),
+				]
+			)
 		)
 	)
 
@@ -98,7 +120,13 @@ func _build_digest(seed_value: int) -> String:
 	lines.append(
 		(
 			"night one: incumbent=%s/%s(CRIT) -> fix=%s/%s(IMMUNE)  raid_event=%d"
-			% [sc["incumbent_handle"], sc["incumbent_spec"], sc["fix_handle"], sc["fix_spec"], handle["event_id"]]
+			% [
+				sc["incumbent_handle"],
+				sc["incumbent_spec"],
+				sc["fix_handle"],
+				sc["fix_spec"],
+				handle["event_id"]
+			]
 		)
 	)
 

@@ -102,9 +102,7 @@ static func _move_cursor(db: Variant, day: int, phase: String) -> void:
 static func _roll_week(db: Variant, state: Dictionary, tail_ticked: Array) -> Dictionary:
 	var week_id := int(state["week_id"])
 	var season_id := int(state["season_id"])
-	db.query_with_bindings(
-		"SELECT week_number FROM week WHERE week_id = ?;", [week_id]
-	)
+	db.query_with_bindings("SELECT week_number FROM week WHERE week_id = ?;", [week_id])
 	var week_number := int(db.query_result[0]["week_number"])
 
 	db.query_with_bindings(

@@ -17,14 +17,17 @@ func test_fresh_migrate_applies_0001_exactly_once() -> void:
 	var db: Variant = _open_memory_db()
 	var result: Dictionary = MigratorScript.migrate(db)
 	assert_bool(result.ok).is_true()
-	assert_array(result.applied).is_equal(
-		[
-			"0001_init.sql",
-			"0002_spec_defense_cap.sql",
-			"0003_encounter_contract.sql",
-			"0004_involvement.sql",
-			"0005_turn_cursor.sql",
-		]
+	(
+		assert_array(result.applied)
+		. is_equal(
+			[
+				"0001_init.sql",
+				"0002_spec_defense_cap.sql",
+				"0003_encounter_contract.sql",
+				"0004_involvement.sql",
+				"0005_turn_cursor.sql",
+			]
+		)
 	)
 	db.query(
 		"SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"
@@ -39,14 +42,17 @@ func test_migrate_is_idempotent() -> void:
 	var rerun: Dictionary = MigratorScript.migrate(db)
 	assert_bool(rerun.ok).is_true()
 	assert_array(rerun.applied).is_empty()
-	assert_array(rerun.skipped).is_equal(
-		[
-			"0001_init.sql",
-			"0002_spec_defense_cap.sql",
-			"0003_encounter_contract.sql",
-			"0004_involvement.sql",
-			"0005_turn_cursor.sql",
-		]
+	(
+		assert_array(rerun.skipped)
+		. is_equal(
+			[
+				"0001_init.sql",
+				"0002_spec_defense_cap.sql",
+				"0003_encounter_contract.sql",
+				"0004_involvement.sql",
+				"0005_turn_cursor.sql",
+			]
+		)
 	)
 	assert_array(MigratorScript.list_pending(db)).is_empty()
 	db.close_db()

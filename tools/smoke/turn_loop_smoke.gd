@@ -49,16 +49,19 @@ func _run(seed_value: int) -> String:
 		match str(result["kind"]):
 			"event":
 				var e: Dictionary = result["event"]
-				lines.append(
-					(
-						"week %d day %d: %s (%s)  [ticked empty days %s]"
-						% [
-							_week_number(db),
-							int(e["day"]),
-							str(e["event_type"]).to_upper(),
-							e["time_slot"],
-							str(result["empty_days_ticked"]),
-						]
+				(
+					lines
+					. append(
+						(
+							"week %d day %d: %s (%s)  [ticked empty days %s]"
+							% [
+								_week_number(db),
+								int(e["day"]),
+								str(e["event_type"]).to_upper(),
+								e["time_slot"],
+								str(result["empty_days_ticked"]),
+							]
+						)
 					)
 				)
 				# the smoke does not play raids — just complete and continue

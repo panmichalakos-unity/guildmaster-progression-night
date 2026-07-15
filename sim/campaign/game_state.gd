@@ -21,9 +21,7 @@ const PHASES := ["plan", "raid", "resolve", "grade"]
 ## {season_id, expansion_id, week_id} on success, or {} on failure.
 static func create(db: Variant, seed_value: int) -> Dictionary:
 	# the first season by tier order — Tier 1 today; still Tier 1 when Tier 2 lands
-	db.query(
-		"SELECT season_id, expansion_id FROM season ORDER BY tier_order, season_id LIMIT 1;"
-	)
+	db.query("SELECT season_id, expansion_id FROM season ORDER BY tier_order, season_id LIMIT 1;")
 	if db.query_result.is_empty():
 		push_error("GameState: no seasons seeded — cannot anchor a campaign")
 		return {}

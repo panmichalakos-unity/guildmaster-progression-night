@@ -38,9 +38,11 @@ func test_you_cannot_advance_past_an_unresolved_event() -> void:
 	var db: Variant = c["db"]
 	TurnLoop.advance(db)  # stop on the raid (now in_progress)
 	var blocked := TurnLoop.advance(db)
-	assert_str(str(blocked["kind"])).override_failure_message(
-		"the loop advanced past a raid that was never played"
-	).is_equal("blocked")
+	(
+		assert_str(str(blocked["kind"]))
+		. override_failure_message("the loop advanced past a raid that was never played")
+		. is_equal("blocked")
+	)
 	db.close_db()
 
 
@@ -76,7 +78,9 @@ func test_empty_days_recover_fatigue_deterministically() -> void:
 	WeekState.ensure(db, week_id)
 
 	# put some fatigue on the roster so recovery has something to shed
-	db.query_with_bindings("UPDATE player_week_state SET fatigue = 10 WHERE week_id = ?;", [week_id])
+	db.query_with_bindings(
+		"UPDATE player_week_state SET fatigue = 10 WHERE week_id = ?;", [week_id]
+	)
 	var recovery := int(Tuning.section("calendar").get("empty_day_fatigue_recovery", 4))
 	WeekState.tick_recovery(db, week_id, recovery)
 
@@ -116,9 +120,13 @@ func test_the_season_ends_after_its_last_week() -> void:
 		if kind == "event":
 			TurnLoop.complete_event(db, int(result["event"]["event_id"]))
 
-	assert_str(kind).override_failure_message(
-		"the season never completed within %d weeks of stepping" % season_length
-	).is_equal("season_complete")
+	(
+		assert_str(kind)
+		. override_failure_message(
+			"the season never completed within %d weeks of stepping" % season_length
+		)
+		. is_equal("season_complete")
+	)
 	# no week beyond the season length was created
 	assert_int(int(_scalar(db, "SELECT MAX(week_number) FROM week"))).is_equal(season_length)
 	assert_str(str(GameState.read(db)["phase"])).is_equal("grade")
@@ -138,9 +146,12 @@ func test_progression_is_persisted_not_held_in_memory() -> void:
 	TurnLoop.advance(db)
 	# read GAME_STATE and the event status straight from the DB — nothing cached
 	assert_int(int(GameState.read(db)["current_day"])).is_equal(3)
-	assert_int(
-		int(_scalar(db, "SELECT COUNT(*) FROM calendar_event WHERE status = 'in_progress'"))
-	).is_equal(1)
+	(
+		assert_int(
+			int(_scalar(db, "SELECT COUNT(*) FROM calendar_event WHERE status = 'in_progress'"))
+		)
+		. is_equal(1)
+	)
 	db.close_db()
 
 

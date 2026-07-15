@@ -34,27 +34,32 @@ static func create(db: Variant, config: Dictionary = {}) -> bool:
 	if involvement not in MODES:
 		push_error("GameConfig: unknown involvement_default '%s'" % involvement)
 		return false
-	var sack_risk := 1 if bool(config.get("sack_risk_enabled", DEFAULTS["sack_risk_enabled"])) else 0
+	var sack_risk := (
+		1 if bool(config.get("sack_risk_enabled", DEFAULTS["sack_risk_enabled"])) else 0
+	)
 
-	return db.query_with_bindings(
-		(
-			"INSERT INTO game_config (game_id, difficulty, involvement_default,"
-			+ " sack_risk_enabled, involvement_lineup, involvement_assignments,"
-			+ " involvement_pulls, involvement_loot, involvement_weekly,"
-			+ " involvement_recruitment)"
-			+ " VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
-		),
-		[
-			difficulty,
-			involvement,
-			sack_risk,
-			involvement,  # every domain starts on the preset — the presets ARE this
-			involvement,
-			involvement,
-			involvement,
-			involvement,
-			involvement,
-		]
+	return (
+		db
+		. query_with_bindings(
+			(
+				"INSERT INTO game_config (game_id, difficulty, involvement_default,"
+				+ " sack_risk_enabled, involvement_lineup, involvement_assignments,"
+				+ " involvement_pulls, involvement_loot, involvement_weekly,"
+				+ " involvement_recruitment)"
+				+ " VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+			),
+			[
+				difficulty,
+				involvement,
+				sack_risk,
+				involvement,  # every domain starts on the preset — the presets ARE this
+				involvement,
+				involvement,
+				involvement,
+				involvement,
+				involvement,
+			]
+		)
 	)
 
 
