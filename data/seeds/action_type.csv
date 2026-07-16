@@ -1,0 +1,10 @@
+slug,display_name,lane,roll_inputs,output_type,output_range
+dungeon_run,Dungeon Run,gearing,"gear,execution",marks,8-16
+drill,Skill Drill,development,"potential,growth_rate",skill_xp,2-5
+spec_test,Spec Test,development,consistency,familiarity,4-9
+farm_mats,Farm Materials,supply,time,mats,18-40
+buy_consumables,Buy Consumables,supply,,consumables,
+convert_mats,Convert Materials,supply,,consumables,
+one_on_one,One-on-One,people,coachability,morale,4-8
+social_night,Guild Social Night,people,,morale,2-4
+rest_week,Rest Week,rest,,fatigue_recovery,8-14

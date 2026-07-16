@@ -102,5 +102,19 @@
 	"availability": {
 		"base_rate": 0.9,
 		"volatility_scale": 0.004
+	},
+	"action": {
+		"weekly_time_budget": 5,
+		"variance_band": 0.15,
+		"quality_spread": 60.0,
+		"difficulty": {
+			"gearing": 55,
+			"development": 50,
+			"supply": 45,
+			"people": 50
+		},
+		"skill_growth_cap": 4,
+		"mats_per_consumable": 8,
+		"loyalty_nudge_max": 3
 	}
 }

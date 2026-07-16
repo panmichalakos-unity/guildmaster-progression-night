@@ -193,6 +193,10 @@
 		{
 			"file": "consumable.csv",
 			"table": "consumable"
+		},
+		{
+			"file": "action_type.csv",
+			"table": "action_type"
 		}
 	]
 }
