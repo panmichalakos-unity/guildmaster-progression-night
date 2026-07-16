@@ -1,0 +1,11 @@
+-- 0006 — the boss subset for a "downshift" raid decision (M5-003).
+--
+-- When the planned bosses are too undergeared, the raid-prep doc gives two ways out:
+-- CONVERT to a dungeon (a CALENDAR_EVENT type change — no new state), or DOWNSHIFT
+-- to "an easier boss subset you *can* gear on (farm the front, gear for the back)".
+-- Downshift is "scheduling a boss subset", so it needs one place to record which
+-- bosses tonight will actually attempt.
+--
+--   NULL           = attempt the whole raid (the default; unchanged behaviour)
+--   CSV of slugs   = attempt only these encounters, in the raid's own order
+ALTER TABLE calendar_event ADD COLUMN target_boss_subset TEXT;

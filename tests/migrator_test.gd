@@ -26,6 +26,7 @@ func test_fresh_migrate_applies_0001_exactly_once() -> void:
 				"0003_encounter_contract.sql",
 				"0004_involvement.sql",
 				"0005_turn_cursor.sql",
+				"0006_downshift_subset.sql",
 			]
 		)
 	)
@@ -51,6 +52,7 @@ func test_migrate_is_idempotent() -> void:
 				"0003_encounter_contract.sql",
 				"0004_involvement.sql",
 				"0005_turn_cursor.sql",
+				"0006_downshift_subset.sql",
 			]
 		)
 	)
@@ -69,12 +71,13 @@ func test_migration_state_is_recorded() -> void:
 	var db: Variant = _open_memory_db()
 	MigratorScript.migrate(db)
 	db.query("SELECT filename FROM schema_migration ORDER BY migration_id;")
-	assert_int(db.query_result.size()).is_equal(5)
+	assert_int(db.query_result.size()).is_equal(6)
 	assert_str(str(db.query_result[0]["filename"])).is_equal("0001_init.sql")
 	assert_str(str(db.query_result[1]["filename"])).is_equal("0002_spec_defense_cap.sql")
 	assert_str(str(db.query_result[2]["filename"])).is_equal("0003_encounter_contract.sql")
 	assert_str(str(db.query_result[3]["filename"])).is_equal("0004_involvement.sql")
 	assert_str(str(db.query_result[4]["filename"])).is_equal("0005_turn_cursor.sql")
+	assert_str(str(db.query_result[5]["filename"])).is_equal("0006_downshift_subset.sql")
 	db.close_db()
 
 
