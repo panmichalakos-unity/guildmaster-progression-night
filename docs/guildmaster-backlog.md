@@ -74,20 +74,15 @@ vertical slice          is it fun?         complete v1 loop        depth & meta
 
 **Then playtest the complete week/season loop** before opening MB.
 
-### 🚨 MC — The Tier-2 content gap (found 2026-07-12; **untracked until now**)
+### ✅ MC — The Tier-2 content gap (found 2026-07-12; **SHIPPED 2026-07-18**)
 
 | # | Milestone | Definition of done | Size | Depends |
 |---|---|---|---|---|
-| **MC-001** | **Author Tier 2** — the second raid | A second raid (~6–8 encounters) seeded for **Season 2 / Tier 2**: phases, `encounter_event` placements, loot table, and **a contract row per boss** in `encounter_contract.csv` inside the Tier-2 gear band. `season.csv` then expresses **two** seasons of the `crownfall` expansion. | **L** | M5 |
+| **MC-001** | **Author Tier 2** — the second raid | ✅ **Done (ADR-0040, commit 4639155).** The Spire of the Drowned King: 6 bosses, phases, placements, loot (ilvl 38–44 + the Deepwatch Marks set), a contract row per boss inside the Tier-2 gear band (x1.64 → x2.20), all `--assert-contracts` + `--probes` green. `season.csv` expresses **two** seasons of `crownfall`. | **L** | M5 |
 
-**Why this is here.** v1's content bar is **2 tiers / ~12 bosses** (`content-and-dod` §Gate 2), and that doc itself says *"where the real authoring time goes: the ~12 bosses."* **We have 1 tier and 4 bosses.** No milestone in M0–M11 ever authored Tier 2 — M1 was explicitly a *starter kit* (one raid, 3–4 encounters), and every milestone after it builds systems, not content.
+**Why this existed.** v1's content bar is **2 tiers / ~12 bosses** (`content-and-dod` §Gate 2). Before MC-001 we had 1 tier and 4 bosses — no milestone in M0–M11 ever authored Tier 2 (M1 was explicitly a *starter kit*, and every milestone after it builds systems, not content). It was the single largest untracked v1 scope item and blocked both MI-011 (*"`season.csv` expresses two seasons"*) and Gate 2 (*"progress into Season 2"*).
 
-This is now the **single largest untracked v1 scope item**, and it is a hard blocker on two things:
-
-- **MI-011** cannot pass its own acceptance (*"`season.csv` expresses two seasons"*) while only one tier of content exists. A season row pointing at a raid that does not exist would be worse than the gap.
-- **Gate 2** (*"play a full season → get graded → progress into Season 2 at a raised bar"*) is not reachable without a Tier 2 to progress *into*.
-
-**Do not fold this into M9.** Grading and season transition are *systems*; authoring 6–8 bespoke bosses is *content*, and the two have very different costs and risks. Sizing it honestly is the point of naming it.
+**Both blockers are now clear.** Remaining honest gap against the "~12 (6/raid)" bar: the game ships **10** bosses (4 + 6). The naming bible reserves two more Tier-1 bosses (Ashpriestess Morvane, Ignarok); adding them retunes the Fun-Gate-approved Emberdeep (ADR-0029) and needs its own ticket + Panos's sign-off — it is a deliberate open decision, not an oversight (ADR-0040).
 
 ## MB — Breadth backlog · *only after the Phase B-lite loop plays well*
 
