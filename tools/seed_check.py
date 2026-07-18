@@ -298,15 +298,25 @@ def check_m1_coverage(con: sqlite3.Connection, present: set[str], c: Checker) ->
         ).fetchall()
         c.check(not orphans,
                 f"MI-009: every encounter has a balance contract ({[o[0] for o in orphans] or 'all good'})")
-        bad = con.execute(
-            "SELECT e.slug FROM encounter_contract ec JOIN encounter e "
-            "ON e.encounter_id = ec.encounter_id "
-            "WHERE ec.win_lo >= ec.win_hi OR ec.expected_gear > ec.farm_gear "
-            "OR ec.farm_gear > 1.65 OR ec.signature_min_delta <= 0"
+        # The reachable gear ceiling is PER TIER (MC-001). The convention behind the
+        # number: nominal full-BiS avg ilvl x 7 slots / 132 starting gear_score —
+        # Tier 1: ilvl 31 -> x1.64; Tier 2: ilvl ~41.5 -> x2.20. A contract whose
+        # farm gear sits above its own tier's ceiling is validating unreachable
+        # content, which is exactly how the pre-MI-001 tier shipped uncompletable.
+        ceiling_by_tier = {1: 1.65, 2: 2.21}
+        rows = con.execute(
+            "SELECT e.slug, ec.win_lo, ec.win_hi, ec.expected_gear, ec.farm_gear, "
+            "ec.signature_min_delta, s.tier_order FROM encounter_contract ec "
+            "JOIN encounter e ON e.encounter_id = ec.encounter_id "
+            "JOIN raid r ON r.raid_id = e.raid_id "
+            "JOIN season s ON s.season_id = r.season_id"
         ).fetchall()
+        bad = [row[0] for row in rows
+               if row[1] >= row[2] or row[3] > row[4] or row[5] <= 0
+               or row[4] > ceiling_by_tier.get(row[6], 1.65)]
         c.check(not bad,
                 "MI-009: contracts are coherent — win_lo < win_hi, expected_gear <= farm_gear, "
-                f"farm gear inside the reachable ceiling x1.64 ({[b[0] for b in bad] or 'all good'})")
+                f"farm gear inside its own tier's reachable ceiling ({bad or 'all good'})")
     if "encounter.csv" in present and "raid.csv" in present:
         thin = con.execute(
             "SELECT r.slug, COUNT(e.encounter_id) FROM raid r "

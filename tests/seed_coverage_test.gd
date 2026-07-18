@@ -50,16 +50,25 @@ func test_class_and_spec_matrix() -> void:
 		)
 
 
-func test_one_raid_with_phase_a_encounters() -> void:
-	assert_int(_count("SELECT COUNT(*) AS n FROM raid")).is_equal(1)
-	var bosses := _count("SELECT COUNT(*) AS n FROM encounter")
-	(
-		assert_bool(bosses >= 3 and bosses <= 6)
-		. override_failure_message(
-			"Phase A wants 3-4 encounters (tier completes in Phase B); got %d" % bosses
+func test_two_raids_carry_the_v1_encounter_ladder() -> void:
+	# MC-001: the v1 content bar is two tiers. Tier 1 keeps its Fun-Gate-approved
+	# 4 bosses (ADR-0029 — never retune that feel silently); Tier 2 is the Drowned
+	# Spire's 6. A third raid appearing here should be a deliberate decision.
+	assert_int(_count("SELECT COUNT(*) AS n FROM raid")).is_equal(2)
+	for raid_expect: Array in [["emberdeep", 4], ["drowned_spire", 6]]:
+		var n := _count(
+			(
+				"SELECT COUNT(*) AS n FROM encounter e JOIN raid r ON r.raid_id = e.raid_id "
+				+ "WHERE r.slug = '%s'" % raid_expect[0]
+			)
 		)
-		. is_true()
-	)
+		(
+			assert_int(n)
+			. override_failure_message(
+				"expected %d encounters in %s, got %d" % [raid_expect[1], raid_expect[0], n]
+			)
+			. is_equal(int(raid_expect[1]))
+		)
 	assert_int(_count("SELECT COUNT(*) AS n FROM event_type")).is_greater_equal(7)
 
 

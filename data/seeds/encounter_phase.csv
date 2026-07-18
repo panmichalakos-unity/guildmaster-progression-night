@@ -6,3 +6,14 @@ slag_p1,Molten Hide,slagbeast,1,
 slag_p2,Slagfrenzy,slagbeast,2,boss_hp<=35
 cinder_p1,Three Thrones,cinderlords,1,
 cinder_p2,The Last Lord,cinderlords,2,boss_hp<=30
+hull_p1,Breach the Hull,hullbreaker,1,
+yssa_p1,The Calling,sirenmatron_yssa,1,
+yssa_p2,Songs of the Deep,sirenmatron_yssa,2,boss_hp<=50
+deyne_p1,The Rot March,rotmarshal_deyne,1,
+deyne_p2,Festering Tide,rotmarshal_deyne,2,boss_hp<=40
+maw_p1,The Open Maw,depthmaw,1,
+maw_p2,Feeding Frenzy,depthmaw,2,boss_hp<=45
+court_p1,The Court Convenes,barnacle_court,1,
+court_p2,Verdict of the Deep,barnacle_court,2,boss_hp<=35
+king_p1,Tidal Grave,drowned_king,1,
+king_p2,The Crown Below,drowned_king,2,boss_hp<=30

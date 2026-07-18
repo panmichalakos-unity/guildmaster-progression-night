@@ -3,3 +3,9 @@ gatewarden_krogg,1.00,0.30,0.50,1.64,0.85,dps_enrage,tank_cap,20.0
 forgemaster_vell,1.12,0.24,0.44,1.64,0.55,dps_enrage,duties,3.0
 slagbeast,1.28,0.22,0.42,1.64,0.48,tank_survival,healers,3.0
 cinderlords,1.42,0.13,0.33,1.64,0.35,dps_enrage,consumables,3.0
+hullbreaker,1.64,0.24,0.44,2.20,0.55,dps_enrage,consumables,3.0
+sirenmatron_yssa,1.74,0.24,0.44,2.20,0.50,dps_enrage,duties,3.0
+rotmarshal_deyne,1.84,0.22,0.42,2.20,0.48,tank_survival,healers,3.0
+depthmaw,1.94,0.22,0.42,2.20,0.45,dps_enrage,range_comp,3.0
+barnacle_court,2.04,0.18,0.38,2.20,0.40,dps_enrage,duties,3.0
+drowned_king,2.12,0.13,0.33,2.20,0.35,dps_enrage,consumables,3.0

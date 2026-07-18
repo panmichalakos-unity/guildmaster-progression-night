@@ -32,9 +32,14 @@ extends SceneTree
 ##
 ## Exits 0 on PASS, 1 on FAIL.
 
-# The REALISTIC in-tier gear band (MI-001): 7 slots, starting ilvl 18.9, every
-# Tier-1 drop ilvl 31 -> full BiS is x1.64. Anything above is unreachable content.
-const GEAR_SWEEP: Array[float] = [0.85, 1.0, 1.12, 1.28, 1.42, 1.55, 1.64]
+# The REALISTIC gear band (MI-001, extended by MC-001): 7 slots, starting ilvl
+# 18.9 -> x1.00; Tier-1 BiS (nominal avg ilvl 31) -> x1.64; Tier-2 BiS (nominal
+# avg ilvl ~41.5, the Drowned Spire drops) -> x2.20. Anything above the highest
+# tier's ceiling is unreachable content. Each boss is asserted at its OWN
+# expected gear; the extra T2 steps also give T1 bosses their into-T2 farm tail.
+const GEAR_SWEEP: Array[float] = [
+	0.85, 1.0, 1.12, 1.28, 1.42, 1.55, 1.64, 1.74, 1.84, 1.94, 2.04, 2.12, 2.20
+]
 const DEFAULT_PULLS := 150
 const PROBE_PULLS := 200
 const BASE_SEED := 424242

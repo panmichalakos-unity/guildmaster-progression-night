@@ -216,3 +216,52 @@ Across five different guild seeds: **1–4 kills each. No seed produces zero.**
 **MI-009** asserts every boss against *its own* contract row — progression win-rate band, farm band, monotonicity in gear, and dominant failure **at the gear the boss is for** — instead of one global band on Boss 1. The gear sweep is clamped to the reachable band, `seed_check` fails a boss with **no** contract row, and CI gates on both `--assert-contracts` and `--probes`. A boss that passes only on gear the player cannot reach is a **failing** boss.
 
 > **Terminology debt (not a blocker).** `farm_win_min` currently sits at 48% (Slagbeast) and 35% (Cinderlords) — which is *late progression*, not what an MMO player means by **farm** (a reliable repeat clear). These are pure-resolution numbers measured **before** learning, Marks, form, consumable scarcity and better planning enter the loop in Phase B. Revisit the thresholds *and the word* once those systems exist, and consider splitting the concept into `expected_progression` / `prepared` / `mastery` / `farm`, plus distinguishing **per-pull** win rate from **per-night clear** probability.
+
+---
+
+## 5. Tier 2 — Spire of the Drowned King (MC-001, 2026-07-18)
+
+**Authored by MC-001.** Six bosses, the second season of the expansion. Same methodology, same invariants, one tier up.
+
+### 5.0 The Tier-2 gear ceiling
+
+The band convention (nominal full-BiS avg ilvl × 7 slots / 132 starting gear_score): Tier-1 BiS is **x1.64** — that is Tier 2's *front door*, exactly as x1.00 was Tier 1's. Drowned Spire drops run ilvl 38 → 44 (escalating per boss, end-boss jump), nominal T2 BiS avg ilvl ~41.5:
+
+| Roster state | multiplier |
+|---|---|
+| Full T1 BiS, zero T2 drops (T2 entry) | **x1.64** |
+| Hullbreaker farmed | ~x1.74 |
+| Half the Spire | ~x1.84–1.94 |
+| Mostly Spire-geared | ~x2.04 |
+| Full T2 BiS | **x2.20** |
+
+> 🔒 **The reachable Tier-2 band is x1.64 → x2.20.** `seed_check` enforces the per-tier ceiling; the harness sweep now covers both bands, and every boss is still asserted at its OWN expected gear. The **Deepwatch** Marks set (ilvl 36, 7 slots) is the T2 catch-up path, per the gear doc's per-tier vendor rule — priced like the Expeditionary set, consumed by M6-005's vendor.
+
+### 5.1 The contracts as measured (150 pulls/cell, prepared raid)
+
+| Boss | Expected gear | Win @ that gear | Band | Farm @x2.20 | Dominant failure | **Signature lever** |
+|---|---|---|---|---|---|---|
+| The Hullbreaker | **x1.64** (fresh from T1) | **39%** | 24–44% | 85% | `dps_enrage` | **consumables · +12.7pp** |
+| Sirenmatron Yssa | x1.74 | **25%** | 24–44% | 62% | `dps_enrage` | **duties · +4.7pp** |
+| Rotmarshal Deyne | x1.84 | **28%** | 22–42% | 57% | `tank_survival` | **healers · +10.0pp** |
+| The Depthmaw | x1.94 | **33%** | 22–42% | 46% | `dps_enrage` | **range_comp · +11.3pp** |
+| The Barnacle Court | x2.04 | **29%** | 18–38% | 40% | `dps_enrage` | **duties · +11.3pp** |
+| The Drowned King | x2.12 | **31%** | 13–33% | 39% | `dps_enrage` | **consumables · +11.3pp** |
+
+Read the diagonal of the full 13-step sweep: every T2 boss is ≤7% at Tier-1 gear — the Spire is visibly out of reach until the Emberdeep is farmed, which is the expansion teaching gearing across seasons, not just within one.
+
+**Boss identities:**
+1. **The Hullbreaker** — T2's front door: a raw output check on a T1-geared raid. The strongest consumables response in the game (+12.7pp) — the Supply lane is the door fee.
+2. **Sirenmatron Yssa** — the song must be cut off: interrupt duties at T2 severity, her call punishes the ranged camp.
+3. **Rotmarshal Deyne** — the second healing wall. Same honest mechanism as Slagbeast: the rot outruns the healing lane until the tank drops (`tank_survival`, difficulty 66 — T2 tank demands sit in the 60s because tank output scales with the band; T1's 30–38 saturate up here).
+4. **The Depthmaw** — the range fight, the lever no T1 boss owns (range_comp +11.3pp): it eats the melee camp. **Its contracted dominant is `dps_enrage`, and that is measured reality** — the Maw kills by eating bodies until the enrage catches what's left. Probes established that collapse-dominant wipes coexist with a progression-band win rate nowhere in the current engine (collapse dominance appears only below ~10% win). Same precedent as Slagbeast's `tank_survival`: the contract states what the fight honestly records; identity lives in the signature lever.
+5. **The Barnacle Court** *(council)* — the soak court: the biggest duties response in the game (+11.3pp).
+6. **The Drowned King** — the end wall: a hard race where full consumable coverage (+11.3pp) and everything you learned all season are the price of the crown. Never trivial at BiS (39%) — it is the end boss.
+
+### 5.2 What must remain true, tier two
+
+1. **The Hullbreaker is killable at x1.64.** A guild that farmed Tier 1 must be able to enter Tier 2 — same deadlock rule as Krogg at x1.00.
+2. **Every T2 boss lives inside x1.64 → x2.20.** The per-tier ceiling is enforced by `seed_check`.
+3. **Tier 1 was not touched.** The Emberdeep's four contracts, checks and feel are the Fun-Gate-approved ones (ADR-0029); the T2 sweep columns confirm their measured rates are unchanged.
+4. Over-healing still costs where it is wrong (−32.7pp on the Hullbreaker) — the opportunity-cost invariant scales with the tier.
+5. The naming bible reserves two more Tier-1 bosses (Ashpriestess Morvane, Ignarok) for a 6+6 shape. Adding them is a **deliberate re-tune of an approved tier** and needs its own ticket + Panos's sign-off, never a silent completion.

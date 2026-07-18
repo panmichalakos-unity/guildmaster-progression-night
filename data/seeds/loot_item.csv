@@ -29,3 +29,34 @@ starter_grips,Frayed Grips,,hands,18,,0,
 starter_legguards,Dented Legguards,,legs,18,,0,
 starter_striders,Scuffed Striders,,feet,18,,0,
 starter_blade,Nicked Blade,,weapon,18,,0,
+brinewrought_helm,Brinewrought Helm,hullbreaker,head,38,tank,0,tank_plate
+tidewoven_grips,Tidewoven Grips,hullbreaker,hands,38,healer,0,healer_focus
+coral_vestment,Coral Vestment,hullbreaker,chest,38,ranged,0,caster
+barnacled_striders,Barnacled Striders,hullbreaker,feet,38,melee,0,melee_physical
+sirens_mantle,Mantle of the Sirenmatron,sirenmatron_yssa,shoulder,39,healer,0,healer_focus
+palecoral_legguards,Palecoral Legguards,sirenmatron_yssa,legs,39,ranged,0,caster
+drowned_cuirass,Drowned Cuirass,sirenmatron_yssa,chest,39,tank,0,tank_plate
+sirensong,"Sirensong, Yssa's Lure",sirenmatron_yssa,weapon,39,ranged,0,caster
+rotmarch_helm,Rotmarch Helm,rotmarshal_deyne,head,40,melee,0,melee_physical
+tidewrought_mantle,Tidewrought Mantle,rotmarshal_deyne,shoulder,40,tank,0,tank_plate
+brinesoaked_grips,Brinesoaked Grips,rotmarshal_deyne,hands,40,melee,0,melee_physical
+coralbound_striders,Coralbound Striders,rotmarshal_deyne,feet,40,healer,0,healer_focus
+depthmaw_legguards,Legguards of the Depthmaw,depthmaw,legs,41,tank,0,tank_plate
+tidal_vestment,Tidal Vestment,depthmaw,chest,41,healer,0,healer_focus
+pale_grips,Pale Grips,depthmaw,hands,41,ranged,0,ranged_physical
+brine_striders,Brine Striders,depthmaw,feet,41,ranged,0,caster
+barnacled_helm,Barnacled Helm,barnacle_court,head,42,healer,0,healer_focus
+coralplate_cuirass,Coralplate Cuirass,barnacle_court,chest,42,melee,0,melee_physical
+tidebound_mantle,Tidebound Mantle,barnacle_court,shoulder,42,ranged,0,ranged_physical
+drowned_legguards,Drowned Legguards,barnacle_court,legs,42,healer,0,healer_focus
+crown_of_the_drowned_king,Crown of the Drowned King,drowned_king,head,44,tank,0,tank_plate
+palefire_mantle,Palefire Mantle,drowned_king,shoulder,44,ranged,0,caster
+sunken_grips,Grips of the Sunken Crown,drowned_king,hands,44,melee,0,melee_physical
+brinesong,"Brinesong, Lament of the Drowned King",drowned_king,weapon,44,melee,0,melee_physical
+deepwatch_helm,Deepwatch Helm,,head,36,,75,
+deepwatch_mantle,Deepwatch Mantle,,shoulder,36,,75,
+deepwatch_cuirass,Deepwatch Cuirass,,chest,36,,75,
+deepwatch_grips,Deepwatch Grips,,hands,36,,75,
+deepwatch_legguards,Deepwatch Legguards,,legs,36,,75,
+deepwatch_striders,Deepwatch Striders,,feet,36,,75,
+deepwatch_blade,Deepwatch Blade,,weapon,36,,90,
