@@ -1,120 +1,120 @@
 {
-	"_comment": "Starter tuning constants (M1-003). EVERY value here is a symbolic placeholder \u00e2\u20ac\u201d the M3-005 batch harness and playtesting are the real judges. Namespaced by system; sim code reads this file directly (it is config seed data, not a DB table). Change values freely; change KEY NAMES only with a cross-validated ticket.",
-	"resolution": {
-		"winrate_target_band": [
-			0.6,
-			0.8
-		],
-		"sigmoid_scale": 12,
-		"hard_check_sigmoid_scale": 7,
-		"tank_healing_share": 0.5,
-		"reference_comp": {
-			"tank": 2,
-			"healer": 5,
-			"dps": 13
-		},
-		"contribution_variance": 0.1,
-		"ceiling_per_ilvl": 2.2,
-		"uncrittable_gate_penalty": 25,
-		"awareness_demand_rate": 0.01,
-		"tank_wear_demand_rate": 0.02,
-		"par_tank_ilvl": 22,
-		"event_scale": 15,
-		"cooldown_surge_bonus": 0.06,
-		"collapse_death_fraction": 0.3,
-		"learning_gain_per_attempt": 6,
-		"learning_gate_band": 30,
-		"learning_familiarity_rate": 0.3,
-		"severity_learning_rate": 0.08,
-		"rating_spread": 12,
-		"reference_realization": 0.65,
-		"fatigue_per_pull": 3,
-		"wipe_extra_fatigue": 1,
-		"kill_morale": 4,
-		"wipe_morale": -2,
-		"death_morale": -1,
-		"save_morale": 2,
-		"form_rate": 0.8,
-		"healing_deficit_lethality": 1.0
-	},
-	"gear": {
-		"spec_fit_multiplier": 0.5,
-		"marks_per_dungeon": 15
-	},
-	"consumables": {
-		"premium_contribution_bonus": 0.08,
-		"basic_contribution_bonus": 0.04
-	},
-	"genesis": {
-		"starting_gold": 500,
-		"starting_reputation": 40,
-		"roster_size": 28,
-		"rebuild_reputation_mult": 0.6,
-		"rebuild_gold_mult": 0.25
-	},
-	"roster": {
-		"stars_share": 0.15,
-		"fringe_share": 0.25,
-		"talent_star": [
-			75,
-			8
-		],
-		"talent_core": [
-			52,
-			12
-		],
-		"talent_fringe": [
-			38,
-			10
-		],
-		"experience_by_preset": {
-			"young_gun": 25,
-			"student": 30,
-			"single": 50,
-			"shift_worker": 55,
-			"working_parent": 65,
-			"veteran": 80
-		},
-		"preset_weights": {
-			"single": 22,
-			"student": 12,
-			"working_parent": 22,
-			"shift_worker": 14,
-			"veteran": 18,
-			"young_gun": 12
-		},
-		"role_targets": {
-			"tank": 4,
-			"healer": 7,
-			"melee": 8,
-			"ranged": 9
-		},
-		"starter_ilvl_band": [
-			14,
-			22
-		]
-	},
-	"calendar": {
-		"empty_day_fatigue_recovery": 4,
-		"raid_day": 3,
-		"rest_day": 6
-	},
-	"availability": {
-		"base_rate": 0.9,
-		"volatility_scale": 0.004
-	},
-	"action": {
-		"weekly_time_budget": 5,
-		"variance_band": 0.15,
-		"quality_spread": 60.0,
-		"difficulty": {
-			"gearing": 55,
-			"development": 50,
-			"supply": 45,
-			"people": 50
-		},
-		"skill_growth_cap": 4,
-		"mats_per_consumable": 8,
-		"loyalty_nudge_max": 3
-	}
+  "_comment": "Starter tuning constants (M1-003). EVERY value here is a symbolic placeholder \u00e2\u20ac\u201d the M3-005 batch harness and playtesting are the real judges. Namespaced by system; sim code reads this file directly (it is config seed data, not a DB table). Change values freely; change KEY NAMES only with a cross-validated ticket.",
+  "resolution": {
+    "winrate_target_band": [
+      0.6,
+      0.8
+    ],
+    "sigmoid_scale": 12,
+    "hard_check_sigmoid_scale": 7,
+    "tank_healing_share": 0.5,
+    "reference_comp": {
+      "tank": 2,
+      "healer": 5,
+      "dps": 13
+    },
+    "contribution_variance": 0.1,
+    "ceiling_per_ilvl": 2.2,
+    "uncrittable_gate_penalty": 25,
+    "awareness_demand_rate": 0.01,
+    "tank_wear_demand_rate": 0.02,
+    "par_tank_ilvl": 22,
+    "event_scale": 15,
+    "cooldown_surge_bonus": 0.06,
+    "collapse_death_fraction": 0.3,
+    "learning_gain_per_attempt": 6,
+    "learning_gate_band": 30,
+    "learning_familiarity_rate": 0.3,
+    "severity_learning_rate": 0.08,
+    "rating_spread": 12,
+    "reference_realization": 0.65,
+    "fatigue_per_pull": 3,
+    "wipe_extra_fatigue": 1,
+    "kill_morale": 4,
+    "wipe_morale": -2,
+    "death_morale": -1,
+    "save_morale": 2,
+    "form_rate": 0.8,
+    "healing_deficit_lethality": 1.0
+  },
+  "gear": {
+    "spec_fit_multiplier": 0.5,
+    "marks_per_dungeon": 15
+  },
+  "consumables": {
+    "premium_contribution_bonus": 0.08,
+    "basic_contribution_bonus": 0.04
+  },
+  "genesis": {
+    "starting_gold": 500,
+    "starting_reputation": 40,
+    "roster_size": 28,
+    "rebuild_reputation_mult": 0.6,
+    "rebuild_gold_mult": 0.25
+  },
+  "roster": {
+    "stars_share": 0.15,
+    "fringe_share": 0.25,
+    "talent_star": [
+      75,
+      8
+    ],
+    "talent_core": [
+      52,
+      12
+    ],
+    "talent_fringe": [
+      38,
+      10
+    ],
+    "experience_by_preset": {
+      "young_gun": 25,
+      "student": 30,
+      "single": 50,
+      "shift_worker": 55,
+      "working_parent": 65,
+      "veteran": 80
+    },
+    "preset_weights": {
+      "single": 22,
+      "student": 12,
+      "working_parent": 22,
+      "shift_worker": 14,
+      "veteran": 18,
+      "young_gun": 12
+    },
+    "role_targets": {
+      "tank": 4,
+      "healer": 7,
+      "melee": 8,
+      "ranged": 9
+    },
+    "starter_ilvl_band": [
+      14,
+      22
+    ]
+  },
+  "calendar": {
+    "empty_day_fatigue_recovery": 4,
+    "raid_day": 3,
+    "rest_day": 6
+  },
+  "availability": {
+    "base_rate": 0.97,
+    "volatility_scale": 0.002
+  },
+  "action": {
+    "weekly_time_budget": 5,
+    "variance_band": 0.15,
+    "quality_spread": 60.0,
+    "difficulty": {
+      "gearing": 55,
+      "development": 50,
+      "supply": 45,
+      "people": 50
+    },
+    "skill_growth_cap": 4,
+    "mats_per_consumable": 8,
+    "loyalty_nudge_max": 3
+  }
 }

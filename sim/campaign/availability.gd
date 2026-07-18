@@ -14,7 +14,11 @@ extends RefCounted
 ##
 ## Reasons are plain-language (MI-008): the digest and prep screen show them as-is.
 
-const DEFAULTS := {"base_rate": 0.9, "volatility_scale": 0.004}
+## Retuned 2026-07-18 (ADR-0039, Panos-approved): the old 0.9/0.004 pair meant an
+## in-window raider showed only ~65% of nights — every single week ran short. Now
+## ~86% mean show: evenings land ~19-22 of 28, short weeks still happen but are
+## events, not the baseline.
+const DEFAULTS := {"base_rate": 0.97, "volatility_scale": 0.002}
 ## Statuses that can be fielded — trials raid too (recruitment/raid-prep docs).
 const RAIDABLE_STATUSES := ["member", "trial"]
 
