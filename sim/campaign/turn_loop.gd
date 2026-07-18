@@ -27,6 +27,11 @@ static func advance(db: Variant, _rng: RngStream = null) -> Dictionary:
 	var state := GameState.read(db)
 	if state.is_empty():
 		return {"kind": "error", "detail": "no campaign"}
+	# the season is played out — grading (M9) owns what happens next. Without this
+	# guard every further "continue" re-ticked the final week's tail-day recovery,
+	# silently melting the very snapshot season grading will read (M5-005 review).
+	if str(state["phase"]) == "grade":
+		return {"kind": "season_complete", "empty_days_ticked": []}
 	var week_id := int(state["week_id"])
 	var current_day := int(state["current_day"])
 	var recovery := int(Tuning.section("calendar").get("empty_day_fatigue_recovery", 4))

@@ -426,3 +426,96 @@ static func _highest_geared(lineup: Array, role_slug: String) -> Dictionary:
 		if best.is_empty() or int(row["gear_score"]) > int(best["gear_score"]):
 			best = row
 	return best
+
+
+## Persist the night's lineup at event grain (M5-005). One row per active avatar of
+## the player guild's current roster: fielded (is_benched=0, with the slot they
+## fill) or benched (is_benched=1). Bench streaks — "Kessa has sat out three
+## straight nights" — are DERIVED from this history (raid-prep doc: no new state),
+## so a night that never persists its lineup never counts toward anyone's streak.
+## Replaces any prior plan for the event; stamped with decided_by (ADR-0033).
+static func persist_lineup(
+	db: Variant, event_id: int, lineup_ids: Array[int], decided_by: String = "player"
+) -> bool:
+	if lineup_ids.is_empty():
+		push_error("RaidPrep: refusing to persist an empty lineup for event %d" % event_id)
+		return false
+	# a played night's record is history, not a plan — never rewrite it (a re-plan
+	# flow reusing the event id would silently hand fielded raiders bench streaks).
+	# in_progress stays writable: the loop flips status before the night resolves.
+	db.query_with_bindings("SELECT status FROM calendar_event WHERE event_id = ?;", [event_id])
+	if (
+		db.query_result.is_empty()
+		or str(db.query_result[0]["status"]) in ["completed", "cancelled"]
+	):
+		push_error("RaidPrep: event %d is not writable — lineup refused" % event_id)
+		return false
+	var marks: Array[String] = []
+	var ids: Array = []
+	for avatar_id in lineup_ids:
+		marks.append("?")
+		ids.append(int(avatar_id))
+	var in_list := ", ".join(marks)
+
+	# the fielded side guards the same invariants the bench side does: every id must
+	# be an active avatar of a current member whose availability (if rolled) says
+	# they can come. One buggy caller must not distort the participation record.
+	db.query_with_bindings(
+		(
+			"SELECT COUNT(*) AS n FROM avatar a"
+			+ " JOIN guild_membership gm ON gm.player_id = a.player_id"
+			+ " JOIN guild g ON g.guild_id = gm.guild_id AND g.is_player_guild = 1"
+			+ " WHERE a.is_active = 1 AND gm.status IN ('member', 'trial')"
+			+ " AND a.avatar_id IN (%s)" % in_list
+			+ " AND NOT EXISTS (SELECT 1 FROM event_availability ea"
+			+ " WHERE ea.event_id = ? AND ea.player_id = a.player_id"
+			+ " AND ea.available = 0);"
+		),
+		ids + [event_id]
+	)
+	if int(db.query_result[0]["n"]) != lineup_ids.size():
+		push_error(
+			"RaidPrep: lineup for event %d includes raiders who are not fieldable" % event_id
+		)
+		return false
+
+	db.query("BEGIN TRANSACTION;")
+	if not db.query_with_bindings("DELETE FROM raid_lineup WHERE event_id = ?;", [event_id]):
+		db.query("ROLLBACK;")
+		return false
+	var fielded_ok: bool = db.query_with_bindings(
+		(
+			"INSERT INTO raid_lineup (event_id, avatar_id, slot_role, is_benched, decided_by)"
+			+ " SELECT ?, a.avatar_id, r.slug, 0, ? FROM avatar a"
+			+ " JOIN spec s ON s.spec_id = a.spec_id"
+			+ " JOIN role r ON r.role_id = s.role_id"
+			+ " WHERE a.avatar_id IN (%s);" % in_list
+		),
+		[event_id, decided_by] + ids
+	)
+	# the rest of the current roster sat this one out — that IS the bench record.
+	# But benched means COULD have played and wasn't fielded: a raider whose
+	# availability roll said "can't make it" gets no row at all (attendance vs
+	# participation — modeling conventions). No roll for the event = everyone counts.
+	var benched_ok: bool = db.query_with_bindings(
+		(
+			"INSERT INTO raid_lineup (event_id, avatar_id, slot_role, is_benched, decided_by)"
+			+ " SELECT ?, a.avatar_id, r.slug, 1, ? FROM avatar a"
+			+ " JOIN spec s ON s.spec_id = a.spec_id"
+			+ " JOIN role r ON r.role_id = s.role_id"
+			+ " JOIN guild_membership gm ON gm.player_id = a.player_id"
+			+ " JOIN guild g ON g.guild_id = gm.guild_id AND g.is_player_guild = 1"
+			+ " WHERE a.is_active = 1 AND gm.status IN ('member', 'trial')"
+			+ " AND a.avatar_id NOT IN (%s)" % in_list
+			+ " AND NOT EXISTS (SELECT 1 FROM event_availability ea"
+			+ " WHERE ea.event_id = ? AND ea.player_id = a.player_id"
+			+ " AND ea.available = 0);"
+		),
+		[event_id, decided_by] + ids + [event_id]
+	)
+	if not fielded_ok or not benched_ok:
+		push_error("RaidPrep: lineup persist failed: %s" % db.error_message)
+		db.query("ROLLBACK;")
+		return false
+	db.query("COMMIT;")
+	return true

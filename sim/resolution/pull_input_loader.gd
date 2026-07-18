@@ -19,18 +19,35 @@ const NEUTRAL_STATE := {"morale": 55, "fatigue": 20, "form": 50}
 
 ## A harness-grade 20-lineup: best-geared 2 tanks / 5 healers / 13 dps.
 ## (M4's raid-prep screen owns the real, player-driven lineup.)
-static func auto_lineup(db: Variant) -> Array[int]:
+## `pool_player_ids` non-empty restricts picks to those players — the M5-005
+## multiweek loop fields only the raiders availability said can come. An EMPTY
+## pool means NO filter (the legacy no-arg call), never "nobody" — a caller
+## gating on availability must handle the nobody-available case itself.
+static func auto_lineup(db: Variant, pool_player_ids: Array = []) -> Array[int]:
+	var pool_sql := ""
+	var pool_binds: Array = []
+	if not pool_player_ids.is_empty():
+		var marks: Array[String] = []
+		for player_id in pool_player_ids:
+			marks.append("?")
+			pool_binds.append(int(player_id))
+		pool_sql = " AND a.player_id IN (%s)" % ", ".join(marks)
+
 	var picked: Array[int] = []
 	for role_count: Array in [["tank", 2], ["healer", 5], ["melee", 6], ["ranged", 7]]:
+		var binds: Array = [role_count[0]]
+		binds.append_array(pool_binds)
+		binds.append(role_count[1])
 		db.query_with_bindings(
 			(
 				"SELECT a.avatar_id FROM avatar a"
 				+ " JOIN spec s ON s.spec_id = a.spec_id"
 				+ " JOIN role r ON r.role_id = s.role_id"
 				+ " WHERE r.slug = ? AND a.is_active = 1"
+				+ pool_sql
 				+ " ORDER BY a.gear_score DESC, a.avatar_id LIMIT ?;"
 			),
-			[role_count[0], role_count[1]]
+			binds
 		)
 		for row in db.query_result:
 			picked.append(int(row["avatar_id"]))

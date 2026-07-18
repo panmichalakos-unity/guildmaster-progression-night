@@ -176,3 +176,44 @@ func _scalar(db: Variant, sql: String) -> Variant:
 		return null
 	var row: Dictionary = db.query_result[0]
 	return row[row.keys()[0]]
+
+
+## Hardening from the M5-005 review: once the season is graded-out, further
+## "continue" presses must be inert. Without the grade-phase guard each call
+## re-ticked tail-day recovery, silently melting the final-week snapshot that
+## season grading (M9) will read.
+func test_advancing_after_season_complete_mutates_nothing() -> void:
+	var c := _campaign()
+	var db: Variant = c["db"]
+	db.query("UPDATE expansion SET season_length_weeks = 1 WHERE expansion_id = 1;")
+	var kind := ""
+	var guard := 0
+	while kind != "season_complete" and guard < 12:
+		guard += 1
+		var result := TurnLoop.advance(db)
+		kind = str(result["kind"])
+		if kind == "event":
+			TurnLoop.complete_event(db, int(result["event"]["event_id"]))
+	assert_str(kind).is_equal("season_complete")
+
+	var week_id := int(GameState.read(db)["week_id"])
+	db.query_with_bindings(
+		"UPDATE player_week_state SET fatigue = 50 WHERE week_id = ?;", [week_id]
+	)
+	var frozen := int(
+		_scalar(db, "SELECT SUM(fatigue) FROM player_week_state WHERE week_id = %d" % week_id)
+	)
+	var again := TurnLoop.advance(db)
+	assert_str(str(again["kind"])).is_equal("season_complete")
+	(
+		assert_int(
+			int(
+				_scalar(
+					db, "SELECT SUM(fatigue) FROM player_week_state WHERE week_id = %d" % week_id
+				)
+			)
+		)
+		. override_failure_message("advancing after season_complete re-ticked recovery")
+		. is_equal(frozen)
+	)
+	db.close_db()
