@@ -116,5 +116,10 @@
     "skill_growth_cap": 4,
     "mats_per_consumable": 8,
     "loyalty_nudge_max": 3
+  },
+  "bench": {
+    "streak_min": 2,
+    "morale_per_night": 2,
+    "loyalty_per_night": 1
   }
 }

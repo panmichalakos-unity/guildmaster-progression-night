@@ -121,22 +121,35 @@ static func _roll_week(db: Variant, state: Dictionary, tail_ticked: Array) -> Di
 		db.query("UPDATE game_state SET phase = 'grade' WHERE game_id = 1;")
 		return {"kind": "season_complete", "empty_days_ticked": tail_ticked}
 
-	# create next week, carry state forward, lay out its default calendar
+	# create next week, carry state forward, lay out its default calendar — as ONE
+	# atomic step (M5-007 review): a half-rolled week used to strand the campaign
+	# on the UNIQUE(season, week_number) key with charges already applied.
+	db.query("BEGIN TRANSACTION;")
 	if not db.query_with_bindings(
 		"INSERT INTO week (season_id, week_number) VALUES (?, ?);", [season_id, week_number + 1]
 	):
+		db.query("ROLLBACK;")
 		return {"kind": "error", "detail": "week insert failed: %s" % db.error_message}
 	db.query("SELECT last_insert_rowid() AS id;")
 	var new_week_id := int(db.query_result[0]["id"])
 
 	WeekState.ensure(db, new_week_id, week_id)
 	if Calendar.build_default_week(db, new_week_id, season_id) < 0:
+		db.query("ROLLBACK;")
 		return {"kind": "error", "detail": "could not build the next week's calendar"}
+	# the bench has a cost (M5-007): the streaks accrued through the played week
+	# charge morale/loyalty as the new week opens — the MARGINAL price, so nights
+	# are never charged twice. The digest recomputes the same numbers. (At
+	# season_complete there is no next snapshot — grading owns the aftermath.)
+	BenchCost.apply(db, week_id, new_week_id)
 
-	db.query_with_bindings(
+	if not db.query_with_bindings(
 		"UPDATE game_state SET week_id = ?, current_day = 0, phase = 'plan' WHERE game_id = 1;",
 		[new_week_id]
-	)
+	):
+		db.query("ROLLBACK;")
+		return {"kind": "error", "detail": "cursor update failed: %s" % db.error_message}
+	db.query("COMMIT;")
 	return {
 		"kind": "week_rolled",
 		"week_number": week_number + 1,

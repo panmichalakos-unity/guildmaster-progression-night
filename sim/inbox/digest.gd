@@ -22,11 +22,10 @@ extends RefCounted
 ## never print progress-percent to a player — the closest attempt speaks the
 ## boss's REMAINING health, where lower is better.
 
-## Read-model presentation thresholds — what the digest points at, not sim tuning
-## (the ticket adds no tuning keys; the sim never reads these).
+## Read-model presentation thresholds — what the digest points at, not sim tuning.
+## (The bench-streak threshold is NOT here: BenchCost owns it, from bench tuning.)
 const AT_RISK_MORALE := 30
 const EXHAUSTED_FATIGUE := 70
-const BENCH_STREAK_MIN := 2
 
 
 ## Every section, from the save alone.
@@ -149,15 +148,21 @@ static func lines(digest: Dictionary) -> PackedStringArray:
 	var exhausted: Array = roster["exhausted"]
 	if not exhausted.is_empty():
 		out.append("  Running on fumes: %s." % ", ".join(_handles_of(exhausted)))
-	for streak: Dictionary in roster["bench_streaks"]:
-		out.append(
-			(
-				"  %s has sat out %d straight raid nights."
-				% [str(streak["handle"]), int(streak["streak"])]
+	for cost: Dictionary in roster["bench_costs"]:
+		(
+			out
+			. append(
+				(
+					"  %s has sat out %d straight raid nights — morale -%d, loyalty -%d."
+					% [
+						str(cost["handle"]),
+						int(cost["streak"]),
+						int(cost["morale_ding"]),
+						int(cost["loyalty_ding"]),
+					]
+				)
 			)
 		)
-	if not roster["bench_streaks"].is_empty():
-		out.append("  TODO: %s" % str(roster["bench_cost_todo"]))
 
 	var economy: Dictionary = digest["economy"]
 	(
@@ -458,73 +463,11 @@ static func _roster(db: Variant, week_id: int) -> Dictionary:
 		"avg_fatigue": 0 if count == 0 else roundi(float(fatigue_sum) / float(count)),
 		"at_risk": at_risk,
 		"exhausted": exhausted,
-		"bench_streaks": _bench_streaks(db, week_id),
-		# the raid-prep doc couples the streak SURFACING (built here) with a
-		# morale/loyalty DING scaled by ego — that ding exists nowhere in sim/ yet
-		# and has no owning ticket. Explicit placeholder, per the M5-005 criteria.
-		"bench_cost_todo":
-		(
-			"bench streaks surface only — the morale/loyalty ding from repeated"
-			+ " benching is not applied anywhere yet and needs an owning ticket."
-		),
+		# the streak walk AND the price live in BenchCost (M5-007) — the same
+		# deterministic function the week roll applies, so the digest reports
+		# exactly what was (or will be) charged, never a parallel estimate
+		"bench_costs": BenchCost.assess(db, week_id),
 	}
-
-
-## Consecutive most-recent benchings per current member, derived from RAID_LINEUP
-## history (raid-prep doc: the bench has a cost, and no new state tracks it). Only
-## completed raids up to this week count; the streak breaks on the first night the
-## raider was actually fielded. A night with NO lineup record neither counts nor
-## breaks — it is skipped (a night that never persisted its lineup is outside the
-## record, matching persist_lineup's contract).
-static func _bench_streaks(db: Variant, week_id: int) -> Array[Dictionary]:
-	db.query_with_bindings(
-		(
-			"SELECT ce.event_id FROM calendar_event ce"
-			+ " JOIN week w ON w.week_id = ce.week_id"
-			+ " JOIN week cur ON cur.week_id = ?"
-			+ " WHERE ce.event_type = 'raid' AND ce.status = 'completed'"
-			+ " AND w.season_id = cur.season_id AND w.week_number <= cur.week_number"
-			+ " AND EXISTS (SELECT 1 FROM raid_lineup rl WHERE rl.event_id = ce.event_id)"
-			+ " ORDER BY w.week_number DESC, ce.day DESC, ce.event_id DESC;"
-		),
-		[week_id]
-	)
-	var event_ids: Array[int] = []
-	for row in db.query_result:
-		event_ids.append(int(row["event_id"]))
-	if event_ids.is_empty():
-		return []
-
-	db.query(
-		(
-			"SELECT a.avatar_id, p.handle FROM avatar a"
-			+ " JOIN player p ON p.player_id = a.player_id"
-			+ " JOIN guild_membership gm ON gm.player_id = p.player_id"
-			+ " JOIN guild g ON g.guild_id = gm.guild_id AND g.is_player_guild = 1"
-			+ " WHERE a.is_active = 1 AND gm.status IN ('member', 'trial')"
-			+ " ORDER BY a.avatar_id;"
-		)
-	)
-	var streaks: Array[Dictionary] = []
-	for member in db.query_result.duplicate():
-		var streak := 0
-		for event_id in event_ids:
-			db.query_with_bindings(
-				"SELECT is_benched FROM raid_lineup" + " WHERE event_id = ? AND avatar_id = ?;",
-				[event_id, int(member["avatar_id"])]
-			)
-			if db.query_result.is_empty() or int(db.query_result[0]["is_benched"]) == 0:
-				break
-			streak += 1
-		if streak >= BENCH_STREAK_MIN:
-			streaks.append({"handle": str(member["handle"]), "streak": streak})
-	streaks.sort_custom(
-		func(a: Dictionary, b: Dictionary) -> bool:
-			if int(a["streak"]) != int(b["streak"]):
-				return int(a["streak"]) > int(b["streak"])
-			return str(a["handle"]) < str(b["handle"])
-	)
-	return streaks
 
 
 static func _economy(db: Variant, week_id: int) -> Dictionary:

@@ -261,13 +261,16 @@ func test_bench_streaks_surface_after_two_sits() -> void:
 		)
 
 	var roster: Dictionary = Digest.build(db, week_id)["roster"]
-	var streaks: Array = roster["bench_streaks"]
-	assert_array(streaks).is_not_empty()
+	var costs: Array = roster["bench_costs"]
+	assert_array(costs).is_not_empty()
 	var found := {}
-	for row: Dictionary in streaks:
-		found[str(row["handle"])] = int(row["streak"])
+	for row: Dictionary in costs:
+		found[str(row["handle"])] = row
 	assert_bool(found.has(benched_handle)).is_true()
-	assert_int(int(found[benched_handle])).is_equal(2)
+	assert_int(int(found[benched_handle]["streak"])).is_equal(2)
+	# the cost half is real now (M5-007): the digest prices the streak
+	assert_int(int(found[benched_handle]["morale_ding"])).is_greater(0)
+	assert_int(int(found[benched_handle]["loyalty_ding"])).is_greater(0)
 
 	# a fielded raider never appears in the bench record
 	var fielded_handle := str(
@@ -283,10 +286,6 @@ func test_bench_streaks_surface_after_two_sits() -> void:
 		)
 	)
 	assert_bool(found.has(fielded_handle)).is_false()
-
-	# the cost half of "the bench has a cost" is an EXPLICIT placeholder for now —
-	# the streaks surface, but no morale/loyalty ding exists anywhere yet
-	assert_str(str(roster["bench_cost_todo"])).contains("ding")
 	db.close_db()
 
 
