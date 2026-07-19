@@ -1,5 +1,7 @@
 # Guildmaster: Progression Night — Intervention & Re-alignment Checkpoint
 
+> **CLOSED (2026-07-19): historical register.** Every MI ticket shipped; the Fun Gate passed 2026-07-12 (ADR-0029); the decision register I-01…I-12 is fully executed (I-03 verified end-to-end by ADR-0041, I-12 formally approved by Panos 2026-07-18). Kept verbatim as the record of the 2026-07-11 intervention — do not edit history; the live status lives in the overview and backlog.
+
 > **Purpose:** This document is the breakpoint between the implemented Phase A vertical slice (M0–M4) and the planned campaign/meta work (M5+).
 >
 > It records the evidence, weaknesses, contradictions, risks, and product questions identified during the first full design-and-repository assessment. Its purpose is not to reverse the project, silently expand scope, or declare new decisions locked. Its purpose is to ensure that the player experience is validated before Phase B makes the current assumptions expensive to change.

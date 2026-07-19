@@ -146,8 +146,13 @@ Numeric tuning (symbolic by design — the batch harness validates) · quirks / 
 3. ~~Resolve P1 + consistency~~ ✅ **done via the G-register** — guild genesis, rival ladder, attrition, population, relationship-lite, bench costs, consumable plan, time slots, horizon, `GAME_CONFIG`/`GUILD_CONFIG`, attendance, consumption. (G13 was already clean — no world-buffs mention exists.)
 4. **Decompose Phase A (M0–M4) into kanban stories** with acceptance criteria — then populate the board.
 
-**Recommended next:** Phase-A ticket decomposition — seed data is unblocked and gets authored inside ticket M1.
+~~**Recommended next:** Phase-A ticket decomposition — seed data is unblocked and gets authored inside ticket M1.~~ *(Done long since — Phase A shipped and passed its gate; see the update below.)*
 
 ---
 
 *v1 readiness review — P0 resolved; re-run after P1/content land.*
+
+---
+
+> ### UPDATE (2026-07-19) — this register is fully discharged in CODE, not just design
+> Every P0 and G-item above was resolved on paper before the build; as of M5's completion the load-bearing ones are shipped and test-pinned: G6 bench consequences (M5-007 — marginal, ego-scaled, the digest reports the applied numbers), G11 attendance vs participation (locked into `RAID_LINEUP` semantics, ADR-0038/0042), the P0 turn/campaign frame, lane outcomes, lineup/assignments, gear→power and Marks earning. Remaining paper-only items ride their owning milestones (M6 loot consequences, M7 economy, M8 recruitment/attrition, M9 objectives/rivals/sacking). This doc stays as the historical register; the backlog's gap list is the live one.

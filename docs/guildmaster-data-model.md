@@ -628,3 +628,13 @@ Build the loop that resolves *first*, layer personality/chemistry *second* (keep
 ---
 
 *v0.8 — G-register fold-in: `GUILD_CONFIG` merge (loot + policies), `GAME_CONFIG`, `CALENDAR_EVENT.time_slot`, `GUILD.progress_pace` (rival ladder), RELATIONSHIP ships v1 write-only. v0.7 — added the campaign/turn layer (GAME_STATE, CALENDAR_EVENT), objectives (SEASON_OBJECTIVE, OBJECTIVE_TYPE), gear (SLOT, AVATAR_ITEM, gear_score, marks), raid prep (RAID_LINEUP, RAID_ASSIGNMENT), and the action resolver (ACTION_TYPE). RAID_NIGHT fully refactored to CALENDAR_EVENT (+ EVENT_AVAILABILITY). v0.5 recruitment; v0.4 economy; v0.3 loot; v0.2 resolution. Types indicative (`int` scores 0–100 unless noted; ratings 1–10). Fictional/IP-original naming throughout.*
+
+---
+
+> ### UPDATE (2026-07-19) — schema delta since this doc's v0.8 spine
+> The shipped schema is this doc **plus migrations 0002–0006** (the doc's ERD remains the conceptual truth; these are the build-time additions):
+> - **0004 (ADR-0033, involvement):** `GAME_CONFIG` gains the six per-domain involvement columns (`involvement_lineup/assignments/pulls/loot/weekly/recruitment`); `RAID_LINEUP`, `RAID_ASSIGNMENT`, `WEEK_ACTION`, `LOOT_DROP` gain the **`decided_by`** authorship audit column.
+> - **0005 (ADR-0035, turn cursor):** `GAME_STATE.current_day` — the intra-week cursor the turn loop stops on.
+> - **0006 (ADR-0036, downshift):** `CALENDAR_EVENT.target_boss_subset` — the downshift decision's persisted boss list.
+> - Also live from 0001–0003 but easy to miss reading the prose: `ENCOUNTER_CONTRACT` (the per-boss balance contract, MI-009) and `EVENT_AVAILABILITY` (the per-event availability roll with plain-language `reason`).
+> Grain rulings locked during the build: benched = *could have played* (no `RAID_LINEUP` row for the unavailable — attendance vs participation, ADR-0038); a played night's lineup record is history and cannot be rewritten; `INBOX_ITEM` shipped as the derived view this doc promised — no table.

@@ -104,3 +104,8 @@ The inverse is the drama: toxic culture → donations dry up → can't afford pr
 ---
 
 *v0.1 — between-nights systems locked; economy weights and budget sizes symbolic, to be tuned. IP-original naming throughout.*
+
+---
+
+> ### UPDATE (2026-07-19) — implementation state
+> The action-resolution layer above is **live** (M5-004, ADR-0037): all five lanes resolve as bounded quality rolls over `ACTION_TYPE` seed rows (`data/seeds/action_type.csv` — authored from this doc's own table, since M1's "starter kit" never actually included them), the weekly time budget is a hard wall, every applied action lands atomically with its `WEEK_ACTION` audit row (`decided_by`-stamped) and `TREASURY_LEDGER` entries, and the digest reports the week's actions. Deferred per this doc's own scoping: **coach** (needs Mentor/relationship depth — M10), **recruit/scout** (M8), dungeon **gear drops** + minor skill XP (M6-005), professions (v1.1). The economy sections below (donations, repairs, provisioning, policies) remain design — **M7** owns them; today the treasury holds gold/mats, the stockpile holds consumables, and farm/buy/convert move them with ledger rows.

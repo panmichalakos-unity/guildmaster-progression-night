@@ -1,5 +1,7 @@
 # Guildmaster: Progression Night — Recruitment & Scouting (v0.1)
 
+> **STATUS (2026-07-19): design contract — M8 builds this (one channel in v1; scouting/poach/referrals → MB-003).** Already in place: `PROSPECT_ASSESSMENT` table, the applications inbox queue (reads it, empty until M8), trials are lineup-eligible (M5-003), and trial pulls already feed ratings.
+
 One system, two activities: **scouting** (reduce uncertainty about a prospect) and **recruitment** (the pipeline: source → assess → trial → sign). Too coupled to split.
 
 **The key reuse:** the visibility line falls exactly on the **Avatar / Player** boundary we already built. No new fog-of-war concept — it's latent in the two-layer model.

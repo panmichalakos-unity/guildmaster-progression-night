@@ -56,7 +56,7 @@ RAID_LINEUP · RAID_ASSIGNMENT · WEEK_ACTION · LOOT_DROP
 
 The CHECK **deliberately reserves room for officer slugs** in v1.1, when delegation quality becomes a recruitable stat (§5) — so v1.1 needs no migration. Auto-authored rows are otherwise **identical** to manual ones, which is why the existing `PULL_EVENT` / `LOOT_CLAIM` / `WEEK_ACTION` audit trails and the "why did this happen" view (M7-005) work unchanged in every mode.
 
-**This migration lands with M5-001**, before Phase-B screens start writing these tables.
+**This migration ~~lands with~~ LANDED with M5-001** (migration 0004, ADR-0033) — genesis writes all six columns from `involvement_default`, and every M5 decision writer already stamps `decided_by`.
 
 ---
 
@@ -124,7 +124,7 @@ Assisted is exactly the experience Night One was measured on: the flawed greedy 
 
 **Defence in depth — it would teach itself anyway.** Even without the PIN, the fallible officer does *not* pre-solve the lesson: on Instant it fields the same crittable default, wipes with `tank_survival` as primary cause, hits the recurrence threshold ("the same wall, not bad luck"), and the printed recommendation is the fix. The player learns the lesson through the report instead of the prep screen. The PIN exists so they learn it the *good* way; the fallback exists so the contract is honest that the lesson is load-bearing in the systems, not just the tutorial.
 
-*(This makes `tests/first_night_test.gd` a natural sibling for a "PIN holds on Instant" case when M5-001 lands.)*
+*(This ~~makes~~ made `tests/first_night_test.gd` a natural sibling for a "PIN holds on Instant" case ~~when M5-001 lands~~ — M5-001 landed and the PIN fires once per campaign, ADR-0034.)*
 
 ---
 

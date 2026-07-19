@@ -12,6 +12,13 @@ A Football Manager–style guild-management sim set in a fictional, old-school (
 | **data-model** | Full ERD (three subject areas), entity reference, lakehouse mapping. |
 | **campaign-and-objectives** | Turn loop, calendar, season/expansion structure, save model, objectives (the success system). |
 | **resolution** | Raid-night engine: pipeline, checks, difficulty, learning arc, events. |
+| **encounter-contracts** | Per-boss tuning contracts (both tiers): expected gear, win bands, dominant failure, signature lever, the gear ceiling. |
+| **first-session** | The Night One contract — the curated first session that teaches diagnose → fix → succeed. |
+| **presentation** | The raid-night show: notability hierarchy, phase beats, the closing beat, "closest yet". |
+| **diagnostics** | Why did we wipe: primary cause vs contributing factors vs key moment; the anti-scapegoat rule. |
+| **terminology** | Dual-language UI copy: consequence first, action always, MMO term in parentheses; the glossary. |
+| **rating** | The 1–10 performance rating: what it measures, event deltas, no double-counting. |
+| **involvement** | Manual / Assisted / Instant per domain; who authors the inputs; the Night One PIN. |
 | **raid-prep** | Lineup, comp check, assignments, undermanned/undergeared planning decisions. |
 | **gear** | Per-slot equipped gear, gear_score, readiness caps, spec-fit, Marks catch-up. |
 | **loot** | Loot & fairness: pluggable policies, the Council claim model, consequences. |
@@ -22,7 +29,11 @@ A Football Manager–style guild-management sim set in a fictional, old-school (
 | **content-and-dod** | v1 content volume targets + the two Definition-of-Done gates. |
 | **naming-bible** | IP-safety rules, slug conventions, the full v1 name set + name generators. |
 | **stack-and-tooling** | Engine (Godot 4), data/testing/CI toolchain, art pipeline policy, release path, setup playbook. |
-| **v1-readiness-review** | Gap & loophole register (P0–P3) driving kanban setup. |
+| **v1-readiness-review** | Gap & loophole register (P0–P3) driving kanban setup. *(Historical — all resolved.)* |
+| **intervention-and-realignment** | The 2026-07-11 intervention: analysis + decision register (I-01…I-12). *(Historical — all MI closed.)* |
+| **post-intervention-assessment** | The post-MI audit that surfaced MC-001 and the doc-defect sweep. *(Historical.)* |
+| **phase-a-fun-gate** | The Gate 1 record: the passed verdict, the scorecard, the slice evidence. *(Historical.)* |
+| **decisions** | The build-time ADR log (ADR-0001 → present) — what was decided, when, and why. |
 | **overview** | This doc. |
 
 ## Systems at a glance
@@ -86,12 +97,19 @@ The through-line: **your social management funds and enables your raid capabilit
 - **IP-safe** — replicate systems and feel; invent every proper noun.
 
 ## Status
-- **Locked & documented:** raider model · world/time · resolution · loot · between-nights/economy · recruitment · **campaign & objectives** · **gear** · **raid prep** · conventions. Data model at **v0.8**.
-- **P0 blockers: resolved** (objectives, gear→power, Marks, turn/campaign frame, lineup/assignments, lane outcomes) — see v1-readiness-review.
-- **G-register: resolved** — guild genesis, rival ladder (light), attrition, population tick, relationship-lite, bench costs, consumable plan, time slots, campaign horizon, `GAME_CONFIG`/`GUILD_CONFIG`, attendance, consumption.
-- **Still pending:** seed data (naming bible ✅ done — unblocked) · screen map (optional one-pager) · Phase-A ticket decomposition · quirks/drama content → v1.1.
-- **Final build-readiness audit (pass 3): GO** — backlog restructured (Phase B = M5–M9, Phase C = M10–M11); every DoD item has an owning milestone.
-- **Stack locked:** Godot 4 + GDScript + SQLite · Python/DuckDB balance lab · GitHub (repo/Actions/Projects) · dev-time AI art with curated portrait pool.
+
+> **UPDATE (2026-07-19) — the design phase is long over; this is now a build-status section.** The pre-build status it replaced ("still pending: Phase-A ticket decomposition…") is preserved below, struck through, as the record of where the docs stood when building began.
+
+- **Phase A (M0–M4): shipped.** Schema + migrations, seed kit, roster gen, resolution engine, slice UI. **Gate 1 PASSED 2026-07-12** (Panos: *"hard enough but doable, I feel it just about right"* — see `phase-a-fun-gate.md`).
+- **MI (intervention): all 12 tickets closed.** Encounter contracts + retune, check aggregation, curated Night One, presentation, diagnostics, rating, involvement, terminology, per-boss harness + probes, the Fun Gate, Season = Tier alignment, Phase B-lite rescope (Panos approved B-lite 2026-07-18).
+- **M5 (the playable week): complete, all 7 tickets.** Genesis · turn loop + calendar · availability + prep decisions · the 5-lane action resolver · inbox + digest + the multi-week proof · save/load · the bench cost. ADRs 0034–0038, 0042–0043.
+- **MC-001 (Tier 2): shipped 2026-07-18.** The Spire of the Drowned King — 6 bosses, contracts + probes green in the x1.64→x2.20 band. **The game has 2 raids / 10 bosses across two seasons** (the bible reserves 2 more T1 bosses behind a Panos-gated decision).
+- **Availability retuned 2026-07-18** (Panos-approved): evenings field ~19–22 of 28; short weeks are events, not the baseline.
+- **Next: M6 — loot** (Council + claims panel + consequences), then M7 economy → M8 recruitment → M9 season stakes. Known recorded gaps: pull inputs still read neutral morale/fatigue instead of the week's snapshots (needs a ticket — balance-sensitive); the main-menu save/load surface (Phase-B screens); loot drops unwritten until M6.
+- **Verification state:** 241/241 GdUnit tests · 8 headless smokes · per-boss contract asserts + prep-leverage probes · seed integrity checks · lint/format in CI. Determinism everywhere: same seed + same inputs = same campaign.
+- **Stack locked (unchanged):** Godot 4.7 + GDScript + SQLite (`godot-sqlite`) · GdUnit4 + the balance harness · gdtoolkit · GitHub.
+
+~~**Locked & documented:** raider model · world/time · resolution · loot · between-nights/economy · recruitment · campaign & objectives · gear · raid prep · conventions. Data model at v0.8. **P0 blockers: resolved.** **G-register: resolved.** **Still pending:** seed data (naming bible ✅ done — unblocked) · screen map (optional one-pager) · Phase-A ticket decomposition · quirks/drama content → v1.1. **Final build-readiness audit (pass 3): GO.**~~
 
 ---
 

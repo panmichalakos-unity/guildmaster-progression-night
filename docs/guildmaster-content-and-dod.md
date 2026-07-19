@@ -63,7 +63,7 @@ Coverage: **3 tank specs across 3 classes** (comp resilience — losing one clas
 
 **Technical items — all shipped (M0–M4):**
 - [x] Generate a 20-raider roster (traits + gear + specs), inspectable
-- [x] One raid (3–4 bosses) seeded
+- [x] One raid (3–4 bosses) seeded *(UPDATE 2026-07-18: now **two** raids — MC-001 added the Tier-2 Spire of the Drowned King, 6 bosses, contracts green)*
 - [x] Resolve a raid night: lineup → assignments → pull-by-pull combat log → kill/wipe + `wipe_reason` + per-raider ratings + loot drop
 - [x] Post-night report readable
 - [x] Deterministic: same seed → same result; batch harness runs N pulls, win rates land in each boss's contracted band (`guildmaster-encounter-contracts.md` — progression **22–35%/pull**; the old "~60–80%" figure was a *farm* feel and is superseded, ADR-0024)
@@ -100,25 +100,28 @@ Coverage: **3 tank specs across 3 classes** (comp resilience — losing one clas
 A weak score does **not** mean "add more systems". The remedy is balance, presentation, explanation, stronger leverage, or a better first-session scenario.
 
 ### Gate 2 — v1 Early Access (Phase B, shippable)
+
+> **Checkbox states updated 2026-07-19** — M5 complete, MC-001 shipped. Partial lines carry a split note rather than a false ✓.
+
 **Feature-complete:**
-- [ ] Turn loop: plan → event-day advance → weekly digest, over a 14-week season
-- [ ] 2 tiers, ~12 bosses, difficulty ramp; learning arc working
-- [ ] 5 between-nights lanes with action resolution; time budget + availability gating
-- [ ] Gear: per-slot equip, `gear_score`, caps-from-gear, Marks + vendor + catch-up
-- [ ] Loot: Council + DKP + /roll; 7-factor panel; consequences (morale/loyalty/fairness)
-- [ ] Economy: treasury, donations, proceeds, repairs, 3 policies
-- [ ] Recruitment: fog overlay, 4 channels, source → assess → trial → sign
-- [ ] Objectives: season-start mandate → season-end grading → confidence/reputation → rising bar; personal ambition
-- [ ] Sacking → rebuild (toggle); campaign save/load (one DB per save, `rng_seed`)
-- [ ] Involvement slider on raid night + loot (manual ↔ assisted ↔ instant; *v1 manual = strategy, lineup, between-pull swaps, wipe calls — mid-pull directive injection is v1.1*)
+- [x] Turn loop: plan → event-day advance → weekly digest ✅ *(M5, ADR-0035/0038 — multi-week proven headless; "over a 14-week season" exercised end-to-end when M9 grading lands)*
+- [x] 2 tiers, difficulty ramp; learning arc working ✅ *(MC-001: 2 raids / **10** bosses vs the "~12 (6/raid)" aim — the 2 remaining are the bible's reserved T1 additions, a Panos-gated decision, ADR-0040)*
+- [x] 5 between-nights lanes with action resolution; time budget + availability gating ✅ *(M5-003/004, ADR-0036/0037)*
+- [ ] Gear: per-slot equip, `gear_score`, caps-from-gear ✅ shipped (M2/M3) — **Marks vendor + equip-on-award + catch-up flow still open (M6-005)**; both tiers' vendor sets are already seeded
+- [ ] Loot: Council + DKP + /roll; 7-factor panel; consequences (morale/loyalty/fairness) — **M6 next** *(v1 = Council only; DKP//roll → MB-001)*
+- [ ] Economy: treasury + ledger shipped (M5-004); donations, proceeds, repairs, policies — **M7**
+- [ ] Recruitment: fog overlay, channels, source → assess → trial → sign — **M8** *(v1 = one channel)*
+- [ ] Objectives: season-start mandate → season-end grading → confidence/reputation → rising bar; personal ambition — **M9**
+- [ ] Sacking → rebuild (toggle) — **M9** · campaign save/load ✅ shipped (M5-006, ADR-0043 — sim side; the menu surface is the Phase-B screen pass)
+- [ ] Involvement slider on raid night + loot — contract + per-domain config + `decided_by` audit shipped (MI-007/ADR-0033); **behavior wiring is M9-005**
 
 **Content-complete:** hits the v1 EA column above.
 
 **Quality bars:**
-- [ ] Balance harness green — win-rate targets + sane gearing/skill curves across a full season
-- [ ] Save/load robust; a multi-season campaign completes without critical bugs
-- [ ] Naming bible applied — all content IP-safe
-- [ ] Observability: the "why did this happen" debug view (`PULL_EVENT` / `TREASURY_LEDGER` / `WEEK_ACTION`)
+- [x] Balance harness green — per-boss contracts + prep-leverage probes, both tiers ✅ *(MI-009 + MC-001; "sane gearing/skill curves across a full season" re-verifies under M9)*
+- [ ] Save/load robust ✅ round-trip/newer-build/determinism pinned (M5-006) — **"a multi-season campaign completes"** waits on M9
+- [x] Naming bible applied — all content IP-safe ✅ *(both raids, all items, vendor sets)*
+- [ ] Observability: the "why did this happen" debug view (`PULL_EVENT` / `TREASURY_LEDGER` / `WEEK_ACTION`) — **M7-005** *(the audit tables themselves are live and test-pinned)*
 
 **The one-line bar** *(corrected 2026-07-11 — I-03: **Season = Tier**)*: *Start a guild → play a full **season (Tier 1, ~14 weeks)** → get graded on objectives → progress into **Season 2 (Tier 2)** at a raised bar, or get sacked and rebuild — with every core system exercised.*
 

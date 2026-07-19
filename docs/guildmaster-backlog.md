@@ -35,9 +35,11 @@ vertical slice          is it fun?         complete v1 loop        depth & meta
 
 ---
 
-## MI — Intervention & Fun Gate · *prove the experience before adding breadth* 🔒
+## MI — Intervention & Fun Gate · *prove the experience before adding breadth* ✅ **ALL CLOSED**
 
-**Added 2026-07-11.** M4 shipped technically complete, but the default first session is **32 pulls, 0 kills** — the Fun Gate has *not* passed. Full analysis: `docs/guildmaster-intervention-and-realignment.md`. **MI blocks M5.** Nothing in Phase B starts until the slice demonstrably produces the loop:
+**Added 2026-07-11. UPDATE (2026-07-19): every MI ticket is Done** — MI-010 (the Fun Gate) **passed 2026-07-12**, MI-011 closed 2026-07-18 once MC-001 gave `season.csv` its second season, MI-012 closed on Panos's formal B-lite approval 2026-07-18. The table below stands as the record of what the intervention was.
+
+~~M4 shipped technically complete, but the default first session is **32 pulls, 0 kills** — the Fun Gate has *not* passed.~~ Full analysis: `docs/guildmaster-intervention-and-realignment.md`. ~~**MI blocks M5.**~~ The loop it demanded is now the shipped behavior:
 
 > prepare → pull → understand failure → adjust → get closer → **kill** → want another pull
 
@@ -64,15 +66,20 @@ vertical slice          is it fun?         complete v1 loop        depth & meta
 
 **Rescoped 2026-07-11 (I-12).** Each cluster is a **product gate**: is the previous loop enjoyable? does the new system add a *decision* or only administration? is its effect legible? Breadth (DKP//roll, deep economy, all 4 channels, rival identity) is deferred to the **MB** backlog and only pulled in once the week/season loop plays well.
 
-| # | Milestone | Definition of done (lite) | Size | Depends |
+| # | Milestone | Definition of done (lite) | Size | Status |
 |---|---|---|---|---|
-| **M5** | Turn loop, calendar & genesis | FM event-day stepping over the weekly calendar (days + time slots); guild-genesis / new-game flow on the `GAME_STATE`/`GAME_CONFIG` save root; the 5 lanes + action resolver; availability; decision inbox + weekly digest. **Season = Tier.** Play multiple weeks; roster gears/improves. | L | **MI-010** |
-| **M6** | Loot & consequences *(Council only)* | **Loot Council alone** + the 7-factor claims panel + award ripples into morale/loyalty/fairness. DKP and /roll move to MB-001. | M | M5 |
-| **M7** | Economy *(basic)* | Treasury, donation income, proceeds, repairs, provision. **Deep economy + the 3-policy matrix + death-spiral tuning move to MB-002** (needs recovery valves, MB-004, first). | S–M | M6 |
-| **M8** | Recruitment *(one channel)* | `PROSPECT_ASSESSMENT` fog overlay + **applicants only**: source → assess → trial → sign. Population tick + attrition leave-check. Scouting/poach/referrals move to MB-003. | S–M | M5 |
-| **M9** | Season, objectives & stakes | Objectives issued → season-end grading (rising bar) → sacking → **rebuild**; career summary + endless mode. Rival *ladder* stays (competitive objective needs it); rival *identity/news* is MB-005. | M | M5 |
+| **M5** | Turn loop, calendar & genesis | FM event-day stepping over the weekly calendar (days + time slots); guild-genesis / new-game flow on the `GAME_STATE`/`GAME_CONFIG` save root; the 5 lanes + action resolver; availability; decision inbox + weekly digest. **Season = Tier.** Play multiple weeks; roster gears/improves. | L | ✅ **DONE 2026-07-19** — all 7 tickets (M5-001…007, incl. save/load and the bench cost; ADRs 0034–0038, 0042–0043) |
+| **M6** | Loot & consequences *(Council only)* | **Loot Council alone** + the 7-factor claims panel + award ripples into morale/loyalty/fairness. DKP and /roll move to MB-001. | M | next |
+| **M7** | Economy *(basic)* | Treasury, donation income, proceeds, repairs, provision. **Deep economy + the 3-policy matrix + death-spiral tuning move to MB-002** (needs recovery valves, MB-004, first). | S–M | after M6 |
+| **M8** | Recruitment *(one channel)* | `PROSPECT_ASSESSMENT` fog overlay + **applicants only**: source → assess → trial → sign. Population tick + attrition leave-check. Scouting/poach/referrals move to MB-003. | S–M | after M5 |
+| **M9** | Season, objectives & stakes | Objectives issued → season-end grading (rising bar) → sacking → **rebuild**; career summary + endless mode. Rival *ladder* stays (competitive objective needs it); rival *identity/news* is MB-005. | M | after M5 |
 
 **Then playtest the complete week/season loop** before opening MB.
+
+> **UPDATE (2026-07-19) — recorded gaps with no owning ticket yet** (kept visible here so they cannot rot silently):
+> 1. **Pull inputs still read neutral morale/fatigue/form** instead of the week's `PLAYER_WEEK_STATE` snapshots (the M4 deferral, noted in ADR-0035) — the M5 loop writes state the resolution never reads. Wiring it shifts every boss's measured win rate, so it needs its own balance-verified ticket (natural fit: alongside M6's consequence loops).
+> 2. **The main-menu New/Continue/Load surface** — the sim side shipped in M5-006; the screen belongs to the Phase-B UI pass (ADR-0043).
+> 3. **The bible's two reserved Tier-1 bosses** (Ashpriestess Morvane, Ignarok) — adding them retunes the Fun-Gate-approved Emberdeep; Panos-gated (ADR-0040).
 
 ### ✅ MC — The Tier-2 content gap (found 2026-07-12; **SHIPPED 2026-07-18**)
 

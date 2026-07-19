@@ -1,5 +1,7 @@
 # Guildmaster: Progression Night — Post-Intervention Assessment
 
+> **CLOSED (2026-07-19): historical audit.** Its findings are all discharged: the doc defects were fixed, MC-001 (the Tier-2 gap it surfaced) shipped 2026-07-18, MI-011/MI-012 closed. Kept verbatim as the record; the live status lives in the overview and backlog.
+
 > **Purpose:** Reassess the project after the M0–M4 intervention work, compare it with the pre-intervention baseline, determine whether the project is on track, and identify the remaining gates before Phase B-lite.
 >
 > **Assessment date:** 2026-07-12

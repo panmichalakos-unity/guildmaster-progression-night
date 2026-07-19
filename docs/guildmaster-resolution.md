@@ -40,7 +40,9 @@ P(pass) = sigmoid(margin / scale)
 
 **4 — Timeline & outcome** → run phases; **events** fire (raiders roll attribute vs severity); deaths cascade (fewer bodies → lower DPS/HPS → other checks tip). **Kill** if boss HP → 0 before a hard-fail; else **wipe** on the dominant failed check → `wipe_reason`.
 
-**5 — Write state** → each participant gets a `performance_rating`; the pull writes morale/fatigue/form deltas, updates `encounter_progress`, emits `PULL_EVENT` log rows, and may spawn a `DRAMA_EVENT`.
+**5 — Write state** → each participant gets a `performance_rating`; the pull ~~writes morale/fatigue/form deltas,~~ updates `encounter_progress`, emits `PULL_EVENT` log rows, and may spawn a `DRAMA_EVENT` *(v1.1)*.
+
+> **UPDATE (2026-07-19) — the state loop is half-wired, on record.** The pull *computes* morale/fatigue/form deltas (`state_deltas`) but does **not** apply them to `PLAYER_WEEK_STATE`, and pull *inputs* still read a neutral morale/fatigue/form constant instead of the week's snapshots — even though M5 now owns those snapshots (deferral noted in ADR-0035, re-flagged in the backlog's gap list). Closing either half shifts every boss's measured win rate, so the wiring needs its own balance-verified ticket against the encounter contracts. Until then: the week affects the raid through gear, lineup, availability and assignments — not yet through mood or exhaustion.
 
 ## Checks catalogue
 | Check | Inputs | Demand from | Curve |

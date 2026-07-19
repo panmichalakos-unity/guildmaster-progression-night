@@ -8,8 +8,8 @@
 |---|---|
 | Engine | **Godot 4.7** (pinned — do not upgrade without an ADR) |
 | Language | GDScript only (typed where it helps) |
-| Save/data | SQLite via `godot-sqlite` addon — one DB = one campaign save (addon lands in M0-002) |
-| Tests | GdUnit4 + headless batch harness (addon lands in M0-002) |
+| Save/data | SQLite via `godot-sqlite` addon — one DB = one campaign save |
+| Tests | GdUnit4 + the headless balance harness (per-boss contracts + prep-leverage probes) |
 | Lint/format | gdtoolkit (`gdformat`, `gdlint`) |
 
 Full contract for humans and AI agents: **[CLAUDE.md](CLAUDE.md)** (canonical) and [AGENTS.md](AGENTS.md) (short version). Design docs live in [docs/](docs/) — start at `docs/guildmaster-overview.md`. Build-time decisions are logged in `docs/decisions.md`. Tasks are tracked on the Notion Kanban (link in CLAUDE.md).
@@ -27,7 +27,7 @@ assets/              curated assets only (Git LFS); raw AI output stays out
 docs/                canonical design docs + decisions.md
 ```
 
-`scenes/`, `scripts/`, `resources/` are empty legacy scaffold dirs — new work uses the structure above.
+*(The legacy scaffold dirs `scenes/`, `scripts/`, `resources/` were removed 2026-07-19 — the structure above is the whole layout.)*
 
 ## Commands
 
@@ -43,6 +43,12 @@ godot --headless -s tools/smoke/seed_smoke.gd      # seed smoke: migrate + load 
 godot --headless -s tools/smoke/roster_smoke.gd -- --seed 12345   # print a generated 28-roster + coverage/issues
 godot --headless -s tools/smoke/first_night_smoke.gd -- --seed 133742   # the first session must TEACH (MI-003)
 godot --headless -s tools/smoke/slice_smoke.gd -- --seed 133742   # Phase-A vertical slice: prep → night → report
+godot --headless -s tools/smoke/genesis_smoke.gd -- --seed 12345      # M5-001: new-campaign genesis
+godot --headless -s tools/smoke/turn_loop_smoke.gd -- --seed 12345    # M5-002: FM event-day stepping
+godot --headless -s tools/smoke/availability_smoke.gd -- --seed 12345 # M5-003: who can raid + prep decisions
+godot --headless -s tools/smoke/action_resolver_smoke.gd -- --seed 12345  # M5-004: the five weekly lanes
+godot --headless -s tools/smoke/multiweek_smoke.gd -- --seed 12345 --weeks 3  # M5-005: the whole loop, repeated
+godot --headless -s tools/smoke/save_load_smoke.gd -- --seed 12345    # M5-006: save round-trip + newer-build refusal
 godot --headless -s tools/harness.gd -- --pulls 150 --assert-contracts   # every boss vs its OWN contract (MI-009)
 godot --headless -s tools/harness.gd -- --probes --pulls 150             # does raid prep DECIDE anything? (MI-009)
 godot --headless -s tools/harness.gd -- --pulls 100 --csv user://pulls.csv     # dump per-pull CSV for the balance lab
@@ -57,6 +63,8 @@ Lint/format + seed checks (gdtoolkit installed once via `uv tool install gdtoolk
 ```bash
 gdformat --check sim/ game/ tests/ tools/smoke/    # format check (drop --check to apply)
 gdlint sim/ game/ tests/ tools/smoke/              # lint
+# If Windows Smart App Control blocks the .exe shims, use the module form
+# (same checks): python -m gdtoolkit.formatter / python -m gdtoolkit.linter — see CLAUDE.md
 python tools/seed_check.py                   # seed integrity (stdlib Python, no Godot)
 ```
 

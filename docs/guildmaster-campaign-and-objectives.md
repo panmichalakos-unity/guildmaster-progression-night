@@ -106,3 +106,8 @@ One expansion, two tiers. After the final season is graded: a **career summary**
 ---
 
 *v0.1 — campaign frame + objectives locked. Season length varies by expansion. IP-original naming.*
+
+---
+
+> ### UPDATE (2026-07-19) — implementation state
+> **Live since M5 (ADRs 0034–0038, 0042–0043):** the turn loop's PLAN → ADVANCE → REPORT beat exactly as drawn above — genesis on the `GAME_STATE` save root (Night One always curated), FM event-day stepping with empty-day recovery ticks, availability's two gates (window, then volatility — retuned 2026-07-18 so evenings field ~19–22 of 28), the five lanes, the decision inbox (a purely derived `INBOX_ITEM` view, as specified), the weekly digest, the bench cost at week roll, and **load/continue** (one DB = one save; a newer-build save is refused, content refreshes on load, campaign state persists). The season boundary stops at a `grade` phase and holds — **grading, objectives, the rival ladder, sacking/rebuild and endless mode are M9**, still design-only. `SEASON_OBJECTIVE`/`OBJECTIVE_TYPE` tables exist and the inbox/digest already read them (empty until M9 issues the mandate). Both seasons of the v1 expansion are seeded (MC-001) — the "progress into Season 2" bar is content-real.

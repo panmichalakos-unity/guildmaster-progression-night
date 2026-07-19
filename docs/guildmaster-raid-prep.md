@@ -42,3 +42,11 @@ Both failure modes share one decision surface — the two "can't raid tonight" w
 ---
 
 *v0.1 — raid prep locked. Fixed 20-raider size. IP-original naming.*
+
+---
+
+> ### UPDATE (2026-07-19) — implementation state
+> Shipped and live: the comp check + warnings (M4-002, MI-008 wording), availability rolls + both planning-time decision surfaces (M5-003 — run short / cancel / **downshift** via `target_boss_subset` / **convert** to dungeon), the persisted lineup (`RaidPrep.persist_lineup`, M5-005) and **the bench cost** (M5-007). Two semantics got locked on the way and refine this doc's wording:
+> - **Benched means could have played** — a raider whose availability roll said "can't make it" gets **no** `RAID_LINEUP` row and holds no streak (attendance vs participation, ADR-0038). An unavailable night *skips* a streak rather than resetting it (ADR-0042).
+> - **The ding is marginal** — each week roll charges the streak's price minus what was already charged, ego-scaled (0.5×–1.5×), morale into the new week's snapshot and `loyalty_current` only. Every sat-out night is priced exactly once; the digest reports the exact applied numbers.
+> Still open: per-boss presets and the drag-drop lineup **screen** polish (the Phase-B UI pass); chemistry warnings stay v1.1.

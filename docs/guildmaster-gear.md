@@ -33,3 +33,8 @@ An item isn't a pure number — it can be a big raw upgrade but *wrong* for the 
 ---
 
 *v0.1 — gear model locked. 7 slots. IP-original naming.*
+
+---
+
+> ### UPDATE (2026-07-19) — implementation state
+> Shipped and live: the 7 slots, derived+cached `gear_score`, caps-from-gear (`hit_capped`/`uncrittable` — Krogg's tank gate reads them every pull), spec-fit tags, per-raider `marks` **earned** via the Gearing lane's dungeon runs (M5-004). Seeded and waiting: **both tiers' vendor sets** — Expeditionary (ilvl 26) and Deepwatch (ilvl 36, added by MC-001) with `marks_cost` priced. Still open — owned by **M6-005**: equip-on-award (loot → slot delta → recompute), the Marks **vendor purchase flow**, and dungeon **gear drops**. Until then Marks accumulate but cannot be spent, and awards do not yet move `gear_score`.

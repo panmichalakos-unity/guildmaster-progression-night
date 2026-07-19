@@ -62,7 +62,9 @@ Synergy tags stay **functional labels** (comp vocabulary, not lore): Caster Clea
 | Combat potions | **Bottled Fury** / **Bottled Stone** | burst DPS / emergency defense |
 | Food & kit | **Hearthstew** / **Whetstone Kit** | stats / weapon temp buff |
 
-## Tier 1 raid — **The Emberdeep** (entry, 6 bosses)
+## Tier 1 raid — **The Emberdeep** (entry, 6 bosses reserved — **4 shipped**)
+
+> **UPDATE (2026-07-19):** bosses 1–4 are seeded, tuned and Fun-Gate-approved (ADR-0029). Bosses 5–6 (**Ashpriestess Morvane**, **Ignarok**) remain *reserved names only* — adding them retunes an approved tier, so they wait on their own ticket + Panos's sign-off (ADR-0040). Tier 2 shipped all six of its names (MC-001).
 Mechanical identities double as seed-data intent (checks + range profile):
 1. **Gatewarden Krogg** — the gear gate: tank-survival check intro (uncrittable matters); range-neutral.
 2. **Forgemaster Vell** — assigned-duty showcase: interrupt rotation on casts; **ranged-punisher** (storm targets the ranged camp).
@@ -83,7 +85,7 @@ Formula: `[Theme word] [Slot noun] (of the [Epithet])?` with per-raid theme pool
 - **T1 theme pool:** Ember, Slag, Cinder, Ash, Molten, Forgeworn. **T2:** Brine, Drowned, Coral, Tide, Barnacled, Pale.
 - **Slot nouns:** Helm (Head) · Mantle (Shoulder) · Cuirass/Vestment (Chest) · Grips (Hands) · Legguards (Legs) · Striders (Feet) · Weapon = named uniques.
 - Examples: *Cinderforged Helm*, *Slagworn Grips*, *Mantle of the Ashpriestess*; end-boss weapon: ***Coreflame, Edge of Ignarok***.
-- **Marks vendor set:** the **Expeditionary** set (*Expeditionary Striders*), one per slot per tier.
+- **Marks vendor set:** one per slot per tier — Tier 1: the **Expeditionary** set (*Expeditionary Striders*); Tier 2: the **Deepwatch** set (*Deepwatch Striders*) *(named by MC-001 under this doc's rules — the bible predates Tier 2's authoring)*.
 
 ## Raider name generator (`PLAYER.handle`)
 v1 simplification: **handle = avatar name** (one identity per raider). Three pattern pools, weighted:

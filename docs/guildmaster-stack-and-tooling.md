@@ -11,12 +11,12 @@ Everything needed to deliver end to end, solo, sustainably. Locks the engine dec
 | Save/data | **SQLite** via `godot-sqlite` addon | One DB = one save (as designed); migrations as numbered `.sql` |
 | Testing | **GdUnit4** (unit) + headless batch harness | Sim core is a pure function → CI-testable |
 | Balance lab | **Python 3.12 + uv** · pandas · **DuckDB** · notebooks | Harness dumps Parquet/CSV → query with DuckDB, tune in pandas. Your home turf |
-| Lint/format | **gdtoolkit** (`gdformat`, `gdlint`) | pip-installable; enforced in CI |
+| Lint/format | **gdtoolkit** (`gdformat`, `gdlint`) | pip-installable; enforced in CI. *UPDATE 2026-07-17: on the dev machine Windows Smart App Control blocks the unsigned `.exe` shims — invoke as `python -m gdtoolkit.formatter` / `python -m gdtoolkit.linter` (same checks; documented in CLAUDE.md)* |
 | Editor | **VS Code** + Godot Tools ext (LSP) | Keep your muscle memory; Godot editor for scenes only |
 | VCS | **GitHub private** + **Git LFS** for `assets/` | LFS free tier = 1 GB — ship only *curated* assets; raw AI output stays out of repo |
 | CI/CD | **GitHub Actions** (godot-ci docker image) | Test + seed-check on push; export builds on tag |
-| PM | **GitHub Projects** kanban (rec.) — or Jira Free if muscle memory wins | Issues live next to code; backlog M0–M11 → epics |
-| Docs | The 16 design docs in `/docs`, version-controlled | Mermaid renders on GitHub; Confluence unnecessary; add `decisions.md` for build-time ADRs |
+| PM | ~~GitHub Projects kanban (rec.)~~ **UPDATE: Notion Kanban** ("Guildmaster v2" board — link in CLAUDE.md) | Paste-ready ticket bodies per task; Hermes/agents sync statuses + completion reports |
+| Docs | ~~The 16 design docs~~ **26 docs** in `/docs`, version-controlled | Mermaid renders on GitHub; `decisions.md` carries the ADR log (0001→present); see the overview's doc map |
 | Playtest channel | **itch.io** (private) + `butler` CLI | Pre-Steam builds for friends/testers |
 | Release | **Steam** via GodotSteam addon + SteamPipe (`steamcmd`) | €100 app fee (recoupable ≥ $1k revenue) |
 

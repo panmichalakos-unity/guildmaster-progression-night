@@ -1,5 +1,7 @@
 # Guildmaster: Progression Night — Loot & Fairness System (v0.1)
 
+> **STATUS (2026-07-19): design contract — M6 builds this next.** Already in place from earlier milestones: `LOOT_DROP`/`LOOT_CLAIM`/`PLAYER_LOOT_STANDING`/`GUILD_CONFIG.active_loot_system` tables, `decided_by` audit (ADR-0033), per-raider ratings as evidence (MI-006), the unawarded-loot inbox queue, and both tiers' loot tables seeded. Nothing writes `LOOT_DROP` rows yet — kills report loot as an explicit M6 placeholder.
+
 Loot is the drama engine. The design goal is **not** a fair algorithm — it's a system where *the fairness call is yours and the fallout is real.*
 
 **Core principle: fairness isn't objective, it's per-culture.** The loot system you adopt **sets the yardstick the guild judges you by.** A points guild asks "did the numbers hold?"; a council guild asks "was the call defensible?". Same award, different verdict.
