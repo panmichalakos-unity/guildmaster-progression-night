@@ -4,7 +4,7 @@ extends SceneTree
 ## Usage: godot --headless -s tools/smoke/migrate_smoke.gd
 ##
 ## Creates a disposable DB (user://smoke/migrate_smoke.db), proves:
-##   1. fresh migrate applies 0001_init.sql exactly once,
+##   1. fresh migrate applies the six shipped migrations exactly once,
 ##   2. rerun on the same connection applies nothing (idempotent),
 ##   3. reopen + rerun applies nothing (state persists in schema_migration),
 ##   4. expected table count and foreign_keys pragma,
@@ -14,7 +14,15 @@ const MigratorScript := preload("res://sim/db/migrator.gd")
 
 const SMOKE_DIR := "user://smoke"
 const SMOKE_DB := "user://smoke/migrate_smoke.db"
-const EXPECTED_TABLES := 51  # 50 game tables + schema_migration (ADR-0005)
+const EXPECTED_TABLES := 52  # 51 game tables + schema_migration
+const EXPECTED_MIGRATIONS := [
+	"0001_init.sql",
+	"0002_spec_defense_cap.sql",
+	"0003_encounter_contract.sql",
+	"0004_involvement.sql",
+	"0005_turn_cursor.sql",
+	"0006_downshift_subset.sql",
+]
 
 var _failures: PackedStringArray = []
 
@@ -42,7 +50,7 @@ func _run() -> void:
 	if FileAccess.file_exists(SMOKE_DB):
 		DirAccess.remove_absolute(SMOKE_DB)
 
-	# 1. fresh DB: applies exactly 0001_init.sql
+	# 1. fresh DB: applies the shipped migration chain in order
 	var db: Variant = MigratorScript.open_db(SMOKE_DB)
 	if db == null:
 		_failures.append("could not open smoke DB")
@@ -50,8 +58,8 @@ func _run() -> void:
 	var first: Dictionary = MigratorScript.migrate(db)
 	_check(first.ok, "fresh migrate ok (err='%s' file='%s')" % [first.error, first.failed_file])
 	_check(
-		first.applied == ["0001_init.sql"],
-		"fresh migrate applied exactly [0001_init.sql], got %s" % [first.applied]
+		first.applied == EXPECTED_MIGRATIONS,
+		"fresh migrate applied the expected chain, got %s" % [first.applied]
 	)
 
 	# 2. rerun on same connection: idempotent
@@ -60,8 +68,8 @@ func _run() -> void:
 		second.ok and second.applied.is_empty(), "rerun applied nothing, got %s" % [second.applied]
 	)
 	_check(
-		second.skipped == ["0001_init.sql"],
-		"rerun skipped [0001_init.sql], got %s" % [second.skipped]
+		second.skipped == EXPECTED_MIGRATIONS,
+		"rerun skipped the expected chain, got %s" % [second.skipped]
 	)
 
 	# 3. table count + fk pragma on the live connection

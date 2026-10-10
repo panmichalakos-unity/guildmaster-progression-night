@@ -32,3 +32,9 @@
 # OS junk
 .DS_Store
 Thumbs.db
+
+
+# Disposable local smoke/debug output.
+/.godot_*_out*.txt
+/seed_coverage_out.txt
+/seed_smoke_out.txt

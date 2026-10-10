@@ -48,20 +48,17 @@ func _run() -> void:
 	# 1. first load
 	var first: Dictionary = SeedLoaderScript.load_seeds(db)
 	_check(first.ok, "seed load ok (err='%s' file='%s')" % [first.error, first.failed_file])
-	_check(first.files.size() == 18, "manifest loaded 18 files, got %d" % first.files.size())
+	_check(first.files.size() == 20, "manifest loaded 20 files, got %d" % first.files.size())
 	_check(_count(db, "life_situation") == 6, "life_situation has 6 presets (M2-002)")
 	_check(_count(db, "role") == 4, "role has 4 rows")
 	_check(_count(db, "slot") == 7, "slot has 7 rows")
 	_check(_count(db, "class") == 6, "class has 6 rows (M1-001)")
 	_check(_count(db, "spec") == 18, "spec has 18 rows (M1-001)")
 	_check(_count(db, "spec_utility") == 21, "spec_utility has 21 links (M1-001)")
-	_check(_count(db, "encounter") == 4, "encounter has 4 bosses (M1-002)")
+	_check(_count(db, "encounter") == 10, "encounter has 10 authored bosses")
 	_check(_count(db, "event_type") == 7, "event_type has the core-7 (M1-002)")
-	_check(_count(db, "encounter_event") == 21, "encounter_event has 21 placements (M1-002)")
-	_check(
-		_count(db, "loot_item") == 30,
-		"loot_item has 30 rows: 16 drops + 7 vendor + 7 starter (M1-003/M2-003)"
-	)
+	_check(_count(db, "encounter_event") == 58, "encounter_event has 58 placements")
+	_check(_count(db, "loot_item") == 61, "loot_item has 61 authored rows")
 	_check(_count(db, "consumable") == 10, "consumable has 10 rows (M1-003)")
 
 	# 2. slug integrity
